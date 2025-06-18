@@ -493,7 +493,7 @@
             "hỗn hợp", "cơ thể", "thực vật", "động vật", "tế bào", 
             "thí nghiệm", "nước", "khí", "điện", "nam châm", "Lý", "Hóa", "Sinh", "Hiện tượng", "Nhiệt độ", "Lực", "Ánh sáng", "Âm thanh", "Phản ứng", "Chất", "Hỗn hợp", "Cơ thể", "Thực vật", "Động vật", "Tế bào", "Thí nghiệm", "Nước", "Khí", "Điện", "Nam châm"
         ],
-        homeworkExamples: []
+        homeworkExamples: [],
         chemistryNaming: "english"
     },
     "lich-su-dia-ly": {
@@ -668,55 +668,52 @@
         /**
          * Xử lý gửi tin nhắn của người dùng và nhận phản hồi từ bot.
          */
-        async function guiTinNhan() {
-            const tinNhanNguoiDung = oNhapTinNhan.value.trim();
-            if (!tinNhanNguoiDung) return; // Không làm gì nếu tin nhắn rỗng
+async function guiTinNhan() {
+    const tinNhanNguoiDung = oNhapTinNhan.value.trim();
+    if (!tinNhanNguoiDung) return;
 
-            themTinNhanVaoGiaoDien("nguoi-dung", tinNhanNguoiDung);
-            oNhapTinNhan.value = ''; // Xóa nội dung trong ô nhập liệu
+    themTinNhanVaoGiaoDien("nguoi-dung", tinNhanNguoiDung);
+    oNhapTinNhan.value = '';
 
-            // Xử lý lời chào đơn giản
-            const loiChao = ["chào", "hello",];
-            if (loiChao.some(chao => tinNhanNguoiDung.toLowerCase().includes(chao))) {
-                themTinNhanVaoGiaoDien("bot", `Chào em! Thầy/cô là chatbot hỗ trợ học tập cho học sinh THCS Nguyễn Tri Phương. Trong môn **${subjectFilters[currentSubject].name}**, em muốn hỏi gì hoặc cần bài tập nào để luyện tập?`);
-                return;
-            }
+    // Xử lý lời chào
+    const loiChao = ["chào", "hello"];
+    if (loiChao.some(chao => tinNhanNguoiDung.toLowerCase().includes(chao))) {
+        themTinNhanVaoGiaoDien("bot", `Chào em! Thầy/cô là chatbot hỗ trợ học tập cho học sinh THCS Nguyễn Tri Phương. Trong môn **${subjectFilters[currentSubject].name}**, em muốn hỏi gì hoặc cần bài tập nào để luyện tập?`);
+        return;
+    }
 
-            // --- LOGIC XỬ LÝ YÊU CẦU BÀI TẬP TỪ baitap.txt ---
-            const isAskingForHomework = homeworkRequestPhrases.test(tinNhanNguoiDung.toLowerCase());
+    // Xử lý yêu cầu bài tập
+    const isAskingForHomework = homeworkRequestPhrases.test(tinNhanNguoiDung.toLowerCase());
+    if (isAskingForHomework) {
+        if (currentSubject && subjectFilters[currentSubject] && subjectFilters[currentSubject].homeworkExamples.length > 0) {
+            let examples = subjectFilters[currentSubject].homeworkExamples.map(e => `- ${e}`).join('\n');
+            themTinNhanVaoGiaoDien("bot", `Chào em! Thầy/cô có một vài bài tập môn **${subjectFilters[currentSubject].name}** cho em đây:\n${examples}\n\nEm hãy thử giải và hỏi thầy/cô nếu cần hướng dẫn thêm nhé!`);
+        } else {
+            themTinNhanVaoGiaoDien("bot", "Chào em! Hiện tại thầy/cô chưa có bài tập sẵn cho môn này. Em có muốn thầy/cô gợi ý một dạng bài tập hoặc giải đáp câu hỏi nào không?");
+        }
+        return;
+    }
 
-            if (isAskingForHomework) {
-                if (currentSubject && subjectFilters[currentSubject] && subjectFilters[currentSubject].homeworkExamples.length > 0) {
-                    let examples = subjectFilters[currentSubject].homeworkExamples.map(e => `- ${e}`).join('\n');
-                    themTinNhanVaoGiaoDien("bot", `Chào em! Thầy/cô có một vài bài tập môn **${subjectFilters[currentSubject].name}** cho em đây:\n${examples}\n\nEm hãy thử giải và hỏi thầy/cô nếu cần hướng dẫn thêm nhé!`);
-                } else {
-                    themTinNhanVaoGiaoDien("bot", "Chào em! Hiện tại thầy/cô chưa có bài tập sẵn cho môn này. Em có muốn thầy/cô gợi ý một dạng bài tập hoặc giải đáp câu hỏi nào không?");
-                }
-                return; // Ngừng xử lý tại đây nếu là yêu cầu bài tập từ file
-            }
-            // --- KẾT THÚC LOGIC XỬ LÝ BÀI TẬP TỪ baitap.txt ---
-
-           
-            // Gửi câu hỏi đến mô hình AI nếu không phải là yêu cầu bài tập từ file và phù hợp cấp THCS
-            try {
-                const loiNhac = `Bạn là một giáo viên AI thân thiện, hỗ trợ học sinh THCS trường Nguyễn Tri Phương (xưng hô là thầy/cô với học sinh là em). Bạn chuyên giải đáp câu hỏi và gợi ý cách làm bài tập cho học sinh THCS trong môn ${subjectFilters[currentSubject].name} theo chương trình giáo dục mới. Hãy trả lời ngắn gọn, dễ hiểu, phù hợp với trình độ THCS (lớp 6-9).
-                  if (currentSubject === "khtn") {
+    try {
+        let loiNhac = `Bạn là một giáo viên AI thân thiện, hỗ trợ học sinh THCS trường Nguyễn Tri Phương (xưng hô là thầy/cô với học sinh là em). Bạn chuyên giải đáp câu hỏi và gợi ý cách làm bài tập cho học sinh THCS trong môn ${subjectFilters[currentSubject].name} theo chương trình giáo dục mới. Hãy trả lời ngắn gọn, dễ hiểu, phù hợp với trình độ THCS (lớp 6-9).`;
+        
+        // Thêm hướng dẫn đặc biệt cho môn Hóa học
+        if (currentSubject === "khtn") {
             loiNhac += "\n\nLƯU Ý QUAN TRỌNG: Khi giải đáp về hóa học, luôn sử dụng tên tiếng Anh của các nguyên tố và hợp chất (ví dụ: Sodium bromide thay vì Natri bromua, Iron(III) oxide thay vì Sắt(III) oxit).";
         }
         
-                \n\nCâu hỏi: ${tinNhanNguoiDung}`;
+        loiNhac += `\n\nCâu hỏi: ${tinNhanNguoiDung}`;
 
-                const ketQua = await moHinh.generateContent(loiNhac);
-                const phanHoi = await ketQua.response;
-                const traLoiBot = phanHoi.text();
-                themTinNhanVaoGiaoDien("bot", traLoiBot);
+        const ketQua = await moHinh.generateContent(loiNhac);
+        const phanHoi = await ketQua.response;
+        const traLoiBot = phanHoi.text();
+        themTinNhanVaoGiaoDien("bot", traLoiBot);
 
-            } catch (loi) {
-                console.error("Lỗi khi gọi API Gemini: ", loi);
-                themTinNhanVaoGiaoDien("bot", "Rất tiếc, có lỗi xảy ra. Em vui lòng thử lại sau nhé!");
-            }
-        }
-
+    } catch (loi) {
+        console.error("Lỗi khi gọi API Gemini: ", loi);
+        themTinNhanVaoGiaoDien("bot", "Rất tiếc, có lỗi xảy ra. Em vui lòng thử lại sau nhé!");
+    }
+}
         /**
          * Kiểm tra xem câu hỏi có phù hợp với cấp độ THCS hay không.
          * @param {string} cauHoi - Câu hỏi của người dùng.
