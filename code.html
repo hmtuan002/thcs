@@ -721,6 +721,46 @@ async function guiTinNhan() {
         themTinNhanVaoGiaoDien("bot", "Rất tiếc, có lỗi xảy ra. Em vui lòng thử lại sau nhé!");
     }
 }
+if (currentSubject === "toan") {
+    loiNhac += `\n\nYÊU CẦU CHUYÊN SÂU TOÁN THCS:
+1. PHÂN TÍCH ĐỀ BÀI:
+- Liệt kê GIẢ THIẾT/KẾT LUẬN
+- Vẽ hình minh họa (mô tả bằng text)
+- Xác định dạng toán (hình học, đại số,...)
+
+2. GIẢI PHÁP:
+- Trình bày từng bước có KIỂM TRA LẠI
+- Dùng phương pháp phù hợp trình độ lớp 6-9
+- Đối chiếu với kiến thức SGK Việt Nam
+
+3. KIỂM TRA:
+- Tính hợp lý của từng bước
+- Thử lại với trường hợp đặc biệt
+- So sánh với kết quả ước lượng
+
+4. LƯU Ý:
+- Không dùng kiến thức nâng cao
+- Nếu không chắc chắn, nói rõ "Cần kiểm tra thêm"
+- Ưu tiên phương pháp sư phạm`;
+}
+function kiemTraToan(noiDung) {
+    const canhBao = [
+        "kết quả chưa chính xác",
+        "cần kiểm tra lại",
+        "phương pháp này có thể sai",
+        "vượt quá chương trình THCS"
+    ];
+    
+    return canhBao.some(tu => noiDung.includes(tu));
+}
+
+// Trong hàm guiTinNhan
+themTinNhanVaoGiaoDien("bot", traLoiBot);
+if (currentSubject === "toan" && kiemTraToan(traLoiBot)) {
+    themTinNhanVaoGiaoDien("bot", 
+        "⚠️ Em lưu ý: Kết quả này cần được kiểm tra lại kỹ. " +
+        "Nên tham khảo ý kiến thầy cô trực tiếp để xác minh.");
+}
         /**
          * Kiểm tra xem câu hỏi có phù hợp với cấp độ THCS hay không.
          * @param {string} cauHoi - Câu hỏi của người dùng.
