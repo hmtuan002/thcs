@@ -652,22 +652,24 @@
          * @param {string} vanBan - Nội dung tin nhắn.
          */
         function themTinNhanVaoGiaoDien(nguoiGui, vanBan) {
-            const divTinNhan = document.createElement('div');
-            divTinNhan.classList.add('tin-nhan', `tin-nhan-${nguoiGui}`);
+    const divTinNhan = document.createElement('div');
+    divTinNhan.classList.add('tin-nhan', `tin-nhan-${nguoiGui}`);
 
-            // Chuyển đổi định dạng markdown cơ bản (in đậm, xuống dòng)
-            let formattedText = vanBan.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-            formattedText = formattedText.replace(/\n/g, '<br>');
+    // LOẠI BỎ các ký hiệu công thức toán phức tạp
+    let cleanText = vanBan
+        .replace(/\$(.*?)\$/g, '$1') // Bỏ dấu $ bao quanh công thức
+        .replace(/\\\((.*?)\\\)/g, '$1') // Bỏ \(...\)
+        .replace(/\\\[(.*?)\\\]/g, '$1'); // Bỏ \[...\]
 
-            divTinNhan.innerHTML = formattedText;
-            khungTroChuyen.appendChild(divTinNhan);
-            // Cuộn xuống cuối khung trò chuyện
-            khungTroChuyen.scrollTop = khungTroChuyen.scrollHeight;
-        }
+    // Giữ lại các định dạng cơ bản
+    cleanText = cleanText
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
 
-        /**
-         * Xử lý gửi tin nhắn của người dùng và nhận phản hồi từ bot.
-         */
+    divTinNhan.innerHTML = cleanText;
+    khungTroChuyen.appendChild(divTinNhan);
+    khungTroChuyen.scrollTop = khungTroChuyen.scrollHeight;
+}
 async function guiTinNhan() {
     const tinNhanNguoiDung = oNhapTinNhan.value.trim();
     if (!tinNhanNguoiDung) return;
@@ -701,7 +703,12 @@ async function guiTinNhan() {
         if (currentSubject === "khtn") {
             loiNhac += "\n\nLƯU Ý QUAN TRỌNG: Khi giải đáp về hóa học, luôn sử dụng tên tiếng Anh của các nguyên tố và hợp chất (ví dụ: Sodium bromide thay vì Natri bromua, Iron(III) oxide thay vì Sắt(III) oxit).";
         }
-        
+        if (currentSubject === "toan") {
+    loiNhac += "\n\nLƯU Ý QUAN TRỌNG: Khi trả lời câu hỏi toán học:";
+    loiNhac += "\n1. Dùng từ ngữ đơn giản, rõ ràng";
+    loiNhac += "\n2. Viết công thức chỉ sử dụng kí hiệu toán học thông thường, không sử dụng kí hiệu ngoài lề";
+    loiNhac += "\n3. Không dùng ký hiệu LaTeX hay dấu $";
+}
         loiNhac += `\n\nCâu hỏi: ${tinNhanNguoiDung}`;
 
         const ketQua = await moHinh.generateContent(loiNhac);
