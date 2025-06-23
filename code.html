@@ -316,6 +316,9 @@
                 font-size: 20px;
                 margin-left: 10px;
             }
+            .fa-shapes {
+    font-family: 'Font Awesome 5 Free';
+}
         }
     </style>
 </head>
@@ -327,10 +330,14 @@
                 <i class="fas fa-book-open"></i>
                 Ngữ Văn
             </button>
-            <button class="subject-button" data-subject="toan">
-                <i class="fas fa-calculator"></i>
-                Toán
-            </button>
+            <button class="subject-button" data-subject="toan-dai">
+        <i class="fas fa-calculator"></i>
+        Toán Đại Số 
+    </button>
+    <button class="subject-button" data-subject="toan-hinh">
+        <i class="fas fa-shapes"></i>
+        Toán Hình Học
+    </button>
             <button class="subject-button" data-subject="anh-van">
                 <i class="fas fa-globe"></i>
                 Anh Văn
@@ -373,10 +380,14 @@
                 <i class="fas fa-book-open"></i>
                 Ngữ Văn
             </button>
-            <button class="sidebar-button" data-subject="toan">
-                <i class="fas fa-calculator"></i>
-                Toán
-            </button>
+             <button class="sidebar-button" data-subject="toan-dai">
+        <i class="fas fa-calculator"></i>
+        Toán Đại Số
+    </button>
+    <button class="sidebar-button" data-subject="toan-hinh">
+        <i class="fas fa-shapes"></i>
+        Toán Hình Học
+    </button>
             <button class="sidebar-button" data-subject="anh-van">
                 <i class="fas fa-globe"></i>
                 Anh Văn
@@ -459,16 +470,30 @@
         ],
         homeworkExamples: []
     },
-    "toan": {
-        name: "Toán",
+    "toan-dai": {
+        name: "Toán Đại Số",
         excludeKeywords: [
-            "số", "cộng", "trừ", "nhân", "chia", "mũ", "x", "toán", 
-            "định lí", "giải", "nghiệm", "phương trình", "biểu thức", 
-            "đồ thị", "diện tích", "chu vi", "hình vuông", "hình tròn", 
-            "hình tam giác", "tỉ lệ", "phân số", "Số", "Cộng", "Trừ", "Nhân", "Chia", "Mũ", "X", "Toán",
-"Định lí", "Giải", "Nghiệm", "Phương trình", "Biểu thức",
-"Đồ thị", "Diện tích", "Chu vi", "Hình vuông", "Hình tròn",
-"Hình tam giác", "Tỉ lệ", "Phân số" 
+            "hình", "góc", "đường tròn", "tam giác", "tứ giác", 
+            "đường thẳng", "đường cong", "đường kính", "bán kính",
+            "chu vi", "diện tích", "thể tích", "hình không gian",
+            "hình học", "hình chiếu", "đồng dạng", "Hình", "Góc", 
+            "Đường tròn", "Tam giác", "Tứ giác", "Đường thẳng", 
+            "Đường cong", "Đường kính", "Bán kính", "Chu vi", 
+            "Diện tích", "Thể tích", "Hình không gian", "Hình học", 
+            "Hình chiếu", "Đồng dạng"
+        ],
+        homeworkExamples: []
+    },
+    "toan-hinh": {
+        name: "Toán Hình Học",
+        excludeKeywords: [
+            "phương trình", "biểu thức", "đa thức", "hàm số", 
+            "đồ thị", "bất phương trình", "tỉ lệ", "phân số", 
+            "số thập phân", "số nguyên", "căn bậc", "logarit", 
+            "lũy thừa", "đại số", "Phương trình", "Biểu thức", 
+            "Đa thức", "Hàm số", "Đồ thị", "Bất phương trình", 
+            "Tỉ lệ", "Phân số", "Số thập phân", "Số nguyên", 
+            "Căn bậc", "Logarit", "Lũy thừa", "Đại số"
         ],
         homeworkExamples: []
     },
@@ -721,27 +746,21 @@ async function guiTinNhan() {
         themTinNhanVaoGiaoDien("bot", "Rất tiếc, có lỗi xảy ra. Em vui lòng thử lại sau nhé!");
     }
 }
-if (currentSubject === "toan") {
-    loiNhac += `\n\nYÊU CẦU CHUYÊN SÂU TOÁN THCS:
-1. PHÂN TÍCH ĐỀ BÀI:
-- Liệt kê GIẢ THIẾT/KẾT LUẬN
-- Vẽ hình minh họa (mô tả bằng text)
-- Xác định dạng toán (hình học, đại số,...)
-
-2. GIẢI PHÁP:
-- Trình bày từng bước có KIỂM TRA LẠI
-- Dùng phương pháp phù hợp trình độ lớp 6-9
-- Đối chiếu với kiến thức SGK Việt Nam
-
-3. KIỂM TRA:
-- Tính hợp lý của từng bước
-- Thử lại với trường hợp đặc biệt
-- So sánh với kết quả ước lượng
-
-4. LƯU Ý:
-- Không dùng kiến thức nâng cao
-- Nếu không chắc chắn, nói rõ "Cần kiểm tra thêm"
-- Ưu tiên phương pháp sư phạm`;
+if (currentSubject === "toan-dai" || currentSubject === "toan-hinh") {
+    loiNhac += "\n\nLƯU Ý QUAN TRỌNG: Khi trả lời câu hỏi toán học:";
+    loiNhac += "\n1. Dùng từ ngữ đơn giản, rõ ràng";
+    loiNhac += "\n2. Viết công thức chỉ sử dụng kí hiệu toán học thông thường";
+    loiNhac += "\n3. Không dùng ký hiệu LaTeX hay dấu $";
+    
+    if (currentSubject === "toan-hinh") {
+        loiNhac += "\n4. LUÔN mô tả hình vẽ bằng text nếu cần";
+        loiNhac += "\n5. Ghi rõ giả thiết và kết luận của bài toán hình";
+    }
+    
+    if (currentSubject === "toan-dai") {
+        loiNhac += "\n4. Trình bày từng bước biến đổi rõ ràng";
+        loiNhac += "\n5. Kiểm tra điều kiện xác định (nếu có)";
+    }
 }
 function kiemTraToan(noiDung) {
     const canhBao = [
@@ -751,9 +770,20 @@ function kiemTraToan(noiDung) {
         "vượt quá chương trình THCS"
     ];
     
+    // Thêm cảnh báo đặc biệt cho hình học
+    if (currentSubject === "toan-hinh") {
+        canhBao.push("hình vẽ có thể không chính xác");
+        canhBao.push("cần kiểm tra lại giả thiết");
+    }
+    
+    // Thêm cảnh báo đặc biệt cho đại số
+    if (currentSubject === "toan-dai") {
+        canhBao.push("cần kiểm tra lại phép biến đổi");
+        canhBao.push("điều kiện xác định chưa đầy đủ");
+    }
+    
     return canhBao.some(tu => noiDung.includes(tu));
 }
-
 // Trong hàm guiTinNhan
 themTinNhanVaoGiaoDien("bot", traLoiBot);
 if (currentSubject === "toan" && kiemTraToan(traLoiBot)) {
