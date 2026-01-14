@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Học Tập THCS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2196f3;
+            --secondary-color: #1976d2;
+            --accent-color: #4caf50;
+            --light-color: #e3f2fd;
+            --dark-color: #0d47a1;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            object-fit: contain;
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .app-card {
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .app-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .app-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        
+        .app-1 {
+            background: linear-gradient(rgba(33, 150, 243, 0.8), rgba(33, 150, 243, 0.9)), url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80');
+        }
+        
+        .app-2 {
+            background: linear-gradient(rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 0.9)), url('https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w-600&q=80');
+        }
+        
+        .app-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: white;
+        }
+        
+        .app-content {
+            padding: 30px;
+        }
+        
+        .app-content h2 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        
+        .app-content p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+        
+        .features {
+            margin-bottom: 20px;
+        }
+        
+        .features li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .features i {
+            color: var(--accent-color);
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 30px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        .btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .btn-accent {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-accent:hover {
+            background-color: #43a047;
+        }
+        
+        .info-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .info-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2.2em;
+        }
+        
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .info-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .info-card i {
+            font-size: 40px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .info-card h3 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .apps-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-content {
+                padding: 20px;
+            }
+            
+            .info-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="https://images.squarespace-cdn.com/content/v1/590b1f48e6f2e17836ea5649/bc0bccc3-bb7d-4dd8-ad86-6061f990a3b2/20240918-01.png?format=2500w" 
+                 alt="Logo THCS Nguyễn Tri Phương" 
+                 class="logo">
+            <h1>HỆ THỐNG HỌC TẬP THCS</h1>
+            <p class="subtitle">Trường THCS Nguyễn Tri Phương</p>
+            <p>Công cụ học tập thông minh hỗ trợ học sinh THCS</p>
+        </header>
+        
+        <div class="apps-grid">
+            <div class="app-card" onclick="window.open('ai-giai-bai-tap.html', '_self')">
+                <div class="app-image app-1">
+                    <div class="app-icon">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                </div>
+                <div class="app-content">
+                    <h2>AI Giải Bài Tập Qua Ảnh</h2>
+                    <p>Chụp ảnh bài tập và nhận hướng dẫn giải chi tiết từ AI</p>
+                    
+                    <div class="features">
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Hỗ trợ 8 môn học chính</li>
+                            <li><i class="fas fa-check-circle"></i> Chụp ảnh hoặc tải ảnh lên</li>
+                            <li><i class="fas fa-check-circle"></i> Hướng dẫn giải từng bước</li>
+                            <li><i class="fas fa-check-circle"></i> Không đưa đáp án cuối cùng</li>
+                            <li><i class="fas fa-check-circle"></i> Phù hợp trình độ THCS</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="ai-giai-bai-tap.html" class="btn">
+                        <i class="fas fa-rocket"></i> Truy cập ngay
+                    </a>
+                </div>
+            </div>
+            
+            <div class="app-card" onclick="window.open('ai-chatbot-thcs.html', '_self')">
+                <div class="app-image app-2">
+                    <div class="app-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                </div>
+                <div class="app-content">
+                    <h2>AI Chatbot Học Tập</h2>
+                    <p>Trò chuyện với AI để được giải đáp thắc mắc và ôn tập kiến thức</p>
+                    
+                    <div class="features">
+                        <ul>
+                            <li><i class="fas fa-check-circle"></i> Chatbot đa môn học</li>
+                            <li><i class="fas fa-check-circle"></i> Giải đáp 24/7</li>
+                            <li><i class="fas fa-check-circle"></i> Bài tập theo chủ đề</li>
+                            <li><i class="fas fa-check-circle"></i> Lưu lịch sử trò chuyện</li>
+                            <li><i class="fas fa-check-circle"></i> Giao diện thân thiện</li>
+                        </ul>
+                    </div>
+                    
+                    <a href="ai-chatbot-thcs.html" class="btn btn-accent">
+                        <i class="fas fa-comments"></i> Bắt đầu trò chuyện
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h2>Tại sao chọn hệ thống của chúng tôi?</h2>
+            <div class="info-cards">
+                <div class="info-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Thông Minh</h3>
+                    <p>Sử dụng công nghệ AI tiên tiến để hỗ trợ học tập hiệu quả</p>
+                </div>
+                
+                <div class="info-card">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>Phù hợp THCS</h3>
+                    <p>Được thiết kế riêng cho chương trình học THCS</p>
+                </div>
+                
+                <div class="info-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>An Toàn</h3>
+                    <p>Không thu thập thông tin cá nhân, tập trung vào học tập</p>
+                </div>
+                
+                <div class="info-card">
+                    <i class="fas fa-clock"></i>
+                    <h3>24/7 Hỗ Trợ</h3>
+                    <p>Luôn sẵn sàng hỗ trợ mọi lúc, mọi nơi</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><strong>Trường THCS Nguyễn Tri Phương</strong></p>
+            <p>Hệ thống học tập thông minh - Phiên bản 1.0</p>
+            <p>© 2024 - Design by Nguyen Thanh Tinh</p>
+            <p>Lưu ý: Đây là công cụ hỗ trợ học tập, học sinh cần tự giác và có trách nhiệm với việc học của mình</p>
+        </footer>
+    </div>
+
+    <script>
+        // Thêm hiệu ứng cho các card
+        document.querySelectorAll('.app-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Thêm hiệu ứng cho các nút
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
