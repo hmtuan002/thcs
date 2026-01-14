@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Giải Bài Tập THCS - Chụp Ảnh Bài Tập</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2196f3;
+            --secondary-color: #e3f2fd;
+            --accent-color: #4caf50;
+            --dark-color: #1565c0;
+            --light-color: #f8f9fa;
+            --warning-color: #ff9800;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--secondary-color);
+            color: #333;
+            text-align: center;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 25px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 25px;
+        }
+        
+        .info-box {
+            background-color: #e8f5e9;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: left;
+            border-radius: 8px;
+        }
+        
+        .info-box h3 {
+            color: var(--dark-color);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        #video {
+            width: 100%;
+            display: block;
+            transform: scale(1);
+            transform-origin: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .flash-effect {
+            animation: flash 0.5s;
+        }
+        
+        @keyframes flash {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+        }
+        
+        .btn:hover {
+            background-color: #1976d2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background-color: #607d8b;
+            box-shadow: 0 4px 8px rgba(96, 125, 139, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #546e7a;
+            box-shadow: 0 6px 12px rgba(96, 125, 139, 0.4);
+        }
+        
+        .btn-accent {
+            background-color: var(--accent-color);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-accent:hover {
+            background-color: #43a047;
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+        }
+        
+        #canvas {
+            display: none;
+        }
+        
+        #result {
+            margin-top: 30px;
+            padding: 0;
+            text-align: left;
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result-content {
+            padding: 20px;
+        }
+        
+        .subject-selection {
+            margin-bottom: 25px;
+        }
+        
+        .subject-selection h3 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+        }
+        
+        .subject-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .subject-btn {
+            padding: 12px 15px;
+            background-color: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .subject-btn:hover {
+            background-color: #e3f2fd;
+            border-color: var(--primary-color);
+        }
+        
+        .subject-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .solution-step {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .solution-step h4 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .step-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.9em;
+            margin-right: 5px;
+        }
+        
+        .warning-note {
+            background-color: #fff3e0;
+            border-left: 4px solid var(--warning-color);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            flex-direction: column;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(33, 150, 243, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 10;
+        }
+        
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+        }
+        
+        .zoom-btn:hover {
+            background-color: white;
+            transform: scale(1.1);
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .error {
+            color: #d32f2f;
+            background-color: #ffebee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .home-btn {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .subject-buttons {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-graduation-cap"></i> AI Giải Bài Tập THCS</h1>
+        <p class="subtitle">Chụp ảnh hoặc tải ảnh bài tập lên để nhận hướng dẫn giải chi tiết</p>
+        
+        <div class="info-box">
+            <h3><i class="fas fa-info-circle"></i> Hướng dẫn sử dụng</h3>
+            <p>1. Chọn môn học phù hợp với bài tập của bạn<br>
+               2. Hướng camera vào bài tập hoặc tải ảnh lên<br>
+               3. AI sẽ phân tích và đưa ra hướng giải (KHÔNG cho đáp án cuối cùng)<br>
+               4. Tự giải bài dựa trên hướng dẫn và kiểm tra lại kết quả</p>
+        </div>
+        
+        <div class="subject-selection">
+            <h3><i class="fas fa-book"></i> Chọn môn học</h3>
+            <div class="subject-buttons" id="subject-buttons">
+                <button class="subject-btn" data-subject="toan">
+                    <i class="fas fa-calculator"></i> Toán học
+                </button>
+                <button class="subject-btn" data-subject="ngu-van">
+                    <i class="fas fa-book-open"></i> Ngữ văn
+                </button>
+                <button class="subject-btn" data-subject="vat-ly">
+                    <i class="fas fa-atom"></i> Vật lý
+                </button>
+                <button class="subject-btn" data-subject="hoa-hoc">
+                    <i class="fas fa-flask"></i> Hóa học
+                </button>
+                <button class="subject-btn" data-subject="sinh-hoc">
+                    <i class="fas fa-dna"></i> Sinh học
+                </button>
+                <button class="subject-btn" data-subject="anh-van">
+                    <i class="fas fa-language"></i> Tiếng Anh
+                </button>
+                <button class="subject-btn" data-subject="lich-su">
+                    <i class="fas fa-landmark"></i> Lịch sử
+                </button>
+                <button class="subject-btn" data-subject="dia-ly">
+                    <i class="fas fa-globe-asia"></i> Địa lý
+                </button>
+            </div>
+        </div>
+        
+        <div id="video-container">
+            <video id="video" autoplay playsinline></video>
+            <div class="zoom-controls">
+                <button id="zoomIn" class="zoom-btn" title="Zoom in"><i class="fas fa-search-plus"></i></button>
+                <button id="zoomOut" class="zoom-btn" title="Zoom out"><i class="fas fa-search-minus"></i></button>
+                <button id="zoomReset" class="zoom-btn" title="Reset zoom">1x</button>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button id="switchCamera" class="btn btn-secondary">
+                <i class="fas fa-camera-retro"></i> Đổi camera
+            </button>
+            <button id="capture" class="btn">
+                <i class="fas fa-camera"></i> Chụp ảnh bài tập
+            </button>
+            <button id="uploadBtn" class="btn btn-accent">
+                <i class="fas fa-upload"></i> Tải ảnh lên
+            </button>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+        
+        <canvas id="canvas"></canvas>
+        
+        <div id="result">
+            <div class="result-header">
+                <i class="fas fa-lightbulb"></i> Hướng dẫn giải bài tập
+            </div>
+            <div id="result-content" class="result-content">
+                <p>Kết quả phân tích và hướng dẫn giải sẽ hiển thị tại đây...</p>
+                <p><em>Lưu ý: AI chỉ đưa ra hướng giải, không cung cấp đáp án cuối cùng. Học sinh cần tự giải và kiểm tra lại.</em></p>
+            </div>
+        </div>
+        
+        <div class="home-btn">
+            <button id="homeButton" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Về trang chủ
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const videoContainer = document.getElementById('video-container');
+        const canvas = document.getElementById('canvas');
+        const captureButton = document.getElementById('capture');
+        const switchCameraButton = document.getElementById('switchCamera');
+        const uploadButton = document.getElementById('uploadBtn');
+        const fileInput = document.getElementById('fileInput');
+        const zoomInBtn = document.getElementById('zoomIn');
+        const zoomOutBtn = document.getElementById('zoomOut');
+        const zoomResetBtn = document.getElementById('zoomReset');
+        const resultContent = document.getElementById('result-content');
+        const subjectButtons = document.querySelectorAll('.subject-btn');
+        const homeButton = document.getElementById('homeButton');
+        
+        let currentStream;
+        let facingMode = 'environment';
+        let devices = [];
+        let currentDeviceIndex = 0;
+        let currentZoom = 1;
+        let selectedSubject = 'toan';
+
+        // Khởi tạo chọn môn học
+        subjectButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                subjectButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                selectedSubject = button.dataset.subject;
+                console.log(`Đã chọn môn: ${selectedSubject}`);
+            });
+        });
+
+        // Chọn môn Toán mặc định
+        document.querySelector('[data-subject="toan"]').classList.add('active');
+
+        // Dừng stream camera
+        function stopStream() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        // Lấy danh sách thiết bị camera
+        async function getCameraDevices() {
+            try {
+                const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+                devices = mediaDevices.filter(device => device.kind === 'videoinput');
+                return devices;
+            } catch (err) {
+                console.error("Lỗi khi lấy danh sách thiết bị:", err);
+                return [];
+            }
+        }
+
+        // Bắt đầu camera
+        async function startCamera(deviceId) {
+            stopStream();
+            try {
+                const constraints = {
+                    video: {
+                        deviceId: deviceId ? { exact: deviceId } : undefined,
+                        facingMode: deviceId ? undefined : facingMode,
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                currentStream = stream;
+                video.srcObject = stream;
+                
+                currentZoom = 1;
+                video.style.transform = `scale(${currentZoom})`;
+                
+                if (!deviceId) {
+                    await getCameraDevices();
+                }
+            } catch (err) {
+                resultContent.innerHTML = `<div class="error">Lỗi khi truy cập camera: ${err.message}<br>Vui lòng cấp quyền truy cập camera hoặc tải ảnh lên.</div>`;
+            }
+        }
+
+        // Chuyển đổi camera
+        switchCameraButton.addEventListener('click', async () => {
+            await getCameraDevices();
+            
+            if (devices.length < 2) {
+                resultContent.innerHTML = `<div class="error">Không tìm thấy camera thứ hai</div>`;
+                return;
+            }
+            
+            currentDeviceIndex = (currentDeviceIndex + 1) % devices.length;
+            startCamera(devices[currentDeviceIndex].deviceId);
+        });
+
+        // Xử lý zoom
+        zoomInBtn.addEventListener('click', () => {
+            if (currentZoom < 3) {
+                currentZoom += 0.5;
+                video.style.transform = `scale(${currentZoom})`;
+            }
+        });
+        
+        zoomOutBtn.addEventListener('click', () => {
+            if (currentZoom > 0.5) {
+                currentZoom -= 0.5;
+                video.style.transform = `scale(${currentZoom})`;
+            }
+        });
+        
+        zoomResetBtn.addEventListener('click', () => {
+            currentZoom = 1;
+            video.style.transform = `scale(${currentZoom})`;
+        });
+
+        // Bắt đầu camera khi tải trang
+        startCamera();
+
+        // Chụp ảnh từ video
+        captureButton.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Hiệu ứng chớp
+            videoContainer.classList.add('flash-effect');
+            setTimeout(() => {
+                videoContainer.classList.remove('flash-effect');
+            }, 500);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+            analyzeImage(imageData);
+        });
+
+        // Xử lý tải ảnh lên
+        uploadButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    analyzeImage(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Xử lý nút về trang chủ
+        homeButton.addEventListener('click', () => {
+            window.location.href = 'index.html'; // Thay đổi đường dẫn nếu cần
+        });
+
+        // Gửi ảnh đến Gemini API và xử lý kết quả
+        async function analyzeImage(imageData) {
+            resultContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Đang phân tích bài tập...</p>
+                </div>
+            `;
+            
+            const apiKey = 'AIzaSyAcZaIvApX_UQKWZzP4uj2J1cCseZ_zkyk'; // Thay bằng API key của bạn
+            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent';
+            
+            // Prompt yêu cầu hướng dẫn giải KHÔNG đưa đáp án
+            const prompt = `
+                Bạn là một giáo viên THCS đang hướng dẫn học sinh giải bài tập.
+                
+                YÊU CẦU QUAN TRỌNG:
+                1. PHÂN TÍCH bài tập trong ảnh (toán, văn, lý, hóa, sinh, anh, sử, địa)
+                2. CHỈ ĐƯA RA HƯỚNG GIẢI, PHƯƠNG PHÁP, CÁC BƯỚC THỰC HIỆN
+                3. TUYỆT ĐỐI KHÔNG ĐƯA RA ĐÁP ÁN CUỐI CÙNG
+                4. Giải thích rõ ràng, từng bước, phù hợp với trình độ THCS
+                5. Gợi ý cách kiểm tra lại kết quả
+                
+                Môn học: ${getSubjectName(selectedSubject)}
+                
+                Hãy trả lời với cấu trúc:
+                1. Xác định dạng bài tập
+                2. Phương pháp/kiến thức áp dụng
+                3. Các bước thực hiện (chi tiết)
+                4. Lưu ý quan trọng
+                5. Cách tự kiểm tra kết quả
+                
+                Trình bày rõ ràng, dễ hiểu, không dùng ký hiệu phức tạp.
+            `;
+
+            const requestBody = {
+                contents: [
+                    {
+                        parts: [
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: imageData.split(',')[1]
+                                }
+                            },
+                            {
+                                text: prompt
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            try {
+                const response = await fetch(`${apiUrl}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Lỗi khi gọi API: ' + response.statusText);
+                }
+
+                const data = await response.json();
+                const responseText = data.candidates[0].content.parts[0].text;
+                
+                // Hiển thị kết quả với định dạng đẹp
+                displaySolution(responseText);
+            } catch (err) {
+                resultContent.innerHTML = `
+                    <div class="error">
+                        <p>Lỗi khi phân tích bài tập:</p>
+                        <p>${err.message}</p>
+                        <p>Vui lòng thử lại hoặc tải ảnh khác.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Lấy tên môn học
+        function getSubjectName(subjectCode) {
+            const subjects = {
+                'toan': 'Toán học',
+                'ngu-van': 'Ngữ văn',
+                'vat-ly': 'Vật lý',
+                'hoa-hoc': 'Hóa học',
+                'sinh-hoc': 'Sinh học',
+                'anh-van': 'Tiếng Anh',
+                'lich-su': 'Lịch sử',
+                'dia-ly': 'Địa lý'
+            };
+            return subjects[subjectCode] || 'Toán học';
+        }
+
+        // Hiển thị hướng dẫn giải
+        function displaySolution(solutionText) {
+            // Tách văn bản thành các phần
+            const parts = solutionText.split(/\d\./).filter(part => part.trim().length > 0);
+            
+            let html = '';
+            
+            if (parts.length > 0) {
+                parts.forEach((part, index) => {
+                    const title = getStepTitle(index);
+                    html += `
+                        <div class="solution-step">
+                            <h4><span class="step-number">${index + 1}</span> ${title}</h4>
+                            <p>${part.trim().replace(/\n/g, '<br>')}</p>
+                        </div>
+                    `;
+                });
+                
+                // Thêm cảnh báo không đưa đáp án
+                html += `
+                    <div class="warning-note">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Lưu ý quan trọng</h4>
+                        <p>Hướng dẫn trên chỉ mang tính chất tham khảo. Học sinh cần:</p>
+                        <ul>
+                            <li>Tự thực hiện các bước giải chi tiết</li>
+                            <li>Kiểm tra lại từng bước tính toán</li>
+                            <li>Tham khảo ý kiến thầy cô khi cần</li>
+                            <li>Không phụ thuộc hoàn toàn vào AI</li>
+                        </ul>
+                    </div>
+                `;
+            } else {
+                // Nếu không tách được phần, hiển thị toàn bộ
+                html = `
+                    <div class="solution-step">
+                        <h4><i class="fas fa-lightbulb"></i> Hướng dẫn giải</h4>
+                        <p>${solutionText.replace(/\n/g, '<br>')}</p>
+                    </div>
+                    <div class="warning-note">
+                        <p><strong>Lưu ý:</strong> Đây chỉ là hướng dẫn giải. Bạn cần tự thực hiện và kiểm tra lại kết quả.</p>
+                    </div>
+                `;
+            }
+            
+            // Thêm nút thử lại
+            html += `
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="window.location.reload()">
+                        <i class="fas fa-redo"></i> Phân tích bài tập khác
+                    </button>
+                </div>
+            `;
+            
+            resultContent.innerHTML = html;
+        }
+
+        // Tiêu đề cho các bước
+        function getStepTitle(index) {
+            const titles = [
+                'Xác định dạng bài tập',
+                'Phương pháp giải',
+                'Các bước thực hiện',
+                'Lưu ý quan trọng',
+                'Cách kiểm tra kết quả',
+                'Kiến thức liên quan'
+            ];
+            return titles[index] || 'Bước ' + (index + 1);
+        }
+    </script>
+</body>
+</html>
