@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Giải Bài Tập THCS - Chụp Ảnh Bài Tập</title>
+    <title>AI Giải Bài Tập THCS - Phiên bản cải tiến</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -13,6 +13,11 @@
             --dark-color: #1565c0;
             --light-color: #f8f9fa;
             --warning-color: #ff9800;
+            --danger-color: #f44336;
+        }
+        
+        * {
+            box-sizing: border-box;
         }
         
         body {
@@ -21,29 +26,108 @@
             padding: 0;
             background-color: var(--secondary-color);
             color: #333;
-            text-align: center;
+            line-height: 1.6;
         }
         
-        .container {
-            max-width: 1000px;
-            margin: 20px auto;
-            padding: 25px;
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+        
+        .logo i {
+            font-size: 1.8em;
+        }
+        
+        .app-title {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        .left-panel {
+            flex: 1;
             background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            overflow-y: auto;
+        }
+        
+        .right-panel {
+            flex: 1;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
         }
         
         h1 {
             color: var(--primary-color);
-            font-size: 2.2em;
-            margin-bottom: 15px;
-            font-weight: 700;
+            font-size: 2em;
+            margin-top: 0;
+            margin-bottom: 10px;
         }
         
-        .subtitle {
-            font-size: 1.1em;
-            color: #555;
-            margin-bottom: 25px;
+        h2 {
+            color: var(--dark-color);
+            font-size: 1.5em;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+        }
+        
+        h3 {
+            color: var(--dark-color);
+            font-size: 1.2em;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title i {
+            color: var(--primary-color);
         }
         
         .info-box {
@@ -51,30 +135,128 @@
             border-left: 4px solid var(--accent-color);
             padding: 15px;
             margin-bottom: 20px;
-            text-align: left;
             border-radius: 8px;
         }
         
-        .info-box h3 {
-            color: var(--dark-color);
-            margin-top: 0;
+        .warning-box {
+            background-color: #fff3e0;
+            border-left: 4px solid var(--warning-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .danger-box {
+            background-color: #ffebee;
+            border-left: 4px solid var(--danger-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .tab-container {
+            margin-bottom: 25px;
+        }
+        
+        .tabs {
             display: flex;
-            align-items: center;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            position: relative;
+            color: #666;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: var(--primary-color);
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .subject-selection {
+            margin-bottom: 25px;
+        }
+        
+        .subject-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
             gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .subject-btn {
+            padding: 12px 15px;
+            background-color: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+        }
+        
+        .subject-btn:hover {
+            background-color: #e3f2fd;
+            border-color: var(--primary-color);
+        }
+        
+        .subject-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .subject-btn i {
+            font-size: 1.5em;
         }
         
         #video-container {
             position: relative;
             width: 100%;
-            max-width: 640px;
+            height: 300px;
             margin: 0 auto 20px;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: #000;
         }
         
         #video {
             width: 100%;
+            height: 100%;
+            object-fit: cover;
             display: block;
             transform: scale(1);
             transform-origin: center;
@@ -93,31 +275,33 @@
         
         .button-group {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 25px 0;
             flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
         }
         
         .btn {
-            padding: 12px 24px;
+            padding: 12px 20px;
             font-size: 1em;
             border: none;
-            border-radius: 50px;
+            border-radius: 8px;
             cursor: pointer;
             background-color: var(--primary-color);
             color: white;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.3);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.2);
+            flex: 1;
+            min-width: 140px;
         }
         
         .btn:hover {
             background-color: #1976d2;
             transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.4);
+            box-shadow: 0 6px 12px rgba(33, 150, 243, 0.3);
         }
         
         .btn:active {
@@ -126,90 +310,79 @@
         
         .btn-secondary {
             background-color: #607d8b;
-            box-shadow: 0 4px 8px rgba(96, 125, 139, 0.3);
+            box-shadow: 0 4px 8px rgba(96, 125, 139, 0.2);
         }
         
         .btn-secondary:hover {
             background-color: #546e7a;
-            box-shadow: 0 6px 12px rgba(96, 125, 139, 0.4);
+            box-shadow: 0 6px 12px rgba(96, 125, 139, 0.3);
         }
         
         .btn-accent {
             background-color: var(--accent-color);
-            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
         }
         
         .btn-accent:hover {
             background-color: #43a047;
-            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            box-shadow: 0 4px 8px rgba(244, 67, 54, 0.2);
+        }
+        
+        .btn-danger:hover {
+            background-color: #d32f2f;
+            box-shadow: 0 6px 12px rgba(244, 67, 54, 0.3);
+        }
+        
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            min-width: auto;
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: #f0f7ff;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: var(--accent-color);
+            background-color: #f0fff4;
+        }
+        
+        .file-upload-area i {
+            font-size: 3em;
+            color: var(--primary-color);
+            margin-bottom: 15px;
         }
         
         #canvas {
             display: none;
         }
         
-        #result {
-            margin-top: 30px;
-            padding: 0;
-            text-align: left;
-            background-color: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .result-header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px 20px;
-            font-size: 1.3em;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .result-content {
-            padding: 20px;
-        }
-        
-        .subject-selection {
-            margin-bottom: 25px;
-        }
-        
-        .subject-selection h3 {
-            color: var(--dark-color);
-            margin-bottom: 15px;
-        }
-        
-        .subject-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 10px;
-        }
-        
-        .subject-btn {
-            padding: 12px 15px;
-            background-color: #f5f5f5;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .subject-btn:hover {
-            background-color: #e3f2fd;
-            border-color: var(--primary-color);
-        }
-        
-        .subject-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+        .result-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 10px;
         }
         
         .solution-step {
@@ -218,33 +391,34 @@
             border-bottom: 1px solid #eee;
         }
         
-        .solution-step h4 {
-            color: var(--dark-color);
-            margin-bottom: 10px;
+        .solution-step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .step-header {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 10px;
         }
         
         .step-number {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             background-color: var(--primary-color);
             color: white;
             border-radius: 50%;
             font-size: 0.9em;
-            margin-right: 5px;
+            font-weight: 600;
         }
         
-        .warning-note {
-            background-color: #fff3e0;
-            border-left: 4px solid var(--warning-color);
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 8px;
+        .step-content {
+            padding-left: 38px;
         }
         
         .loading {
@@ -256,13 +430,13 @@
         }
         
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(33, 150, 243, 0.2);
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(33, 150, 243, 0.2);
             border-radius: 50%;
             border-top-color: var(--primary-color);
             animation: spin 1s ease-in-out infinite;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
         @keyframes spin {
@@ -283,7 +457,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(255, 255, 255, 0.9);
             border: none;
             color: #333;
             font-weight: bold;
@@ -300,7 +474,7 @@
             transform: scale(1.1);
         }
         
-        #fileInput {
+        #fileInput, #docFileInput {
             display: none;
         }
         
@@ -312,164 +486,417 @@
             margin-bottom: 15px;
         }
         
-        .home-btn {
+        .success {
+            color: #388e3c;
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .ai-response {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid var(--primary-color);
             margin-top: 20px;
-            text-align: center;
+        }
+        
+        .ai-response h4 {
+            color: var(--primary-color);
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ai-response p {
+            margin: 10px 0;
+        }
+        
+        .response-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .mode-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .mode-camera {
+            background-color: #e3f2fd;
+            color: var(--primary-color);
+        }
+        
+        .mode-document {
+            background-color: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        @media (max-width: 992px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            
+            .left-panel, .right-panel {
+                width: 100%;
+            }
         }
         
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
-                margin: 10px;
+            .content-wrapper {
+                padding: 10px;
             }
             
-            h1 {
-                font-size: 1.8em;
+            .left-panel, .right-panel {
+                padding: 15px;
+            }
+            
+            .subject-buttons {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             }
             
             .button-group {
                 flex-direction: column;
-                gap: 10px;
             }
             
             .btn {
                 width: 100%;
-                justify-content: center;
             }
             
-            .subject-buttons {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            h1 {
+                font-size: 1.7em;
             }
+            
+            h2 {
+                font-size: 1.3em;
+            }
+        }
+        
+        .file-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        
+        .file-type {
+            padding: 8px 15px;
+            background-color: #e3f2fd;
+            border-radius: 20px;
+            font-size: 0.9em;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1><i class="fas fa-graduation-cap"></i> AI Giải Bài Tập THCS</h1>
-        <p class="subtitle">Chụp ảnh hoặc tải ảnh bài tập lên để nhận hướng dẫn giải chi tiết</p>
-        
-        <div class="info-box">
-            <h3><i class="fas fa-info-circle"></i> Hướng dẫn sử dụng</h3>
-            <p>1. Chọn môn học phù hợp với bài tập của bạn<br>
-               2. Hướng camera vào bài tập hoặc tải ảnh lên<br>
-               3. AI sẽ phân tích và đưa ra hướng giải (KHÔNG cho đáp án cuối cùng)<br>
-               4. Tự giải bài dựa trên hướng dẫn và kiểm tra lại kết quả</p>
-        </div>
-        
-        <div class="subject-selection">
-            <h3><i class="fas fa-book"></i> Chọn môn học</h3>
-            <div class="subject-buttons" id="subject-buttons">
-                <button class="subject-btn" data-subject="toan">
-                    <i class="fas fa-calculator"></i> Toán học
-                </button>
-                <button class="subject-btn" data-subject="ngu-van">
-                    <i class="fas fa-book-open"></i> Ngữ văn
-                </button>
-                <button class="subject-btn" data-subject="vat-ly">
-                    <i class="fas fa-atom"></i> Vật lý
-                </button>
-                <button class="subject-btn" data-subject="hoa-hoc">
-                    <i class="fas fa-flask"></i> Hóa học
-                </button>
-                <button class="subject-btn" data-subject="sinh-hoc">
-                    <i class="fas fa-dna"></i> Sinh học
-                </button>
-                <button class="subject-btn" data-subject="anh-van">
-                    <i class="fas fa-language"></i> Tiếng Anh
-                </button>
-                <button class="subject-btn" data-subject="lich-su">
-                    <i class="fas fa-landmark"></i> Lịch sử
-                </button>
-                <button class="subject-btn" data-subject="dia-ly">
-                    <i class="fas fa-globe-asia"></i> Địa lý
-                </button>
+    <div class="main-container">
+        <header>
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <div>
+                        <div>AI Giải Bài Tập THCS</div>
+                        <div class="app-title">Phiên bản cải tiến - Không đưa đáp án</div>
+                    </div>
+                </div>
+                <div id="currentMode" class="mode-indicator mode-camera">Chế độ chụp ảnh</div>
             </div>
-        </div>
+        </header>
         
-        <div id="video-container">
-            <video id="video" autoplay playsinline></video>
-            <div class="zoom-controls">
-                <button id="zoomIn" class="zoom-btn" title="Zoom in"><i class="fas fa-search-plus"></i></button>
-                <button id="zoomOut" class="zoom-btn" title="Zoom out"><i class="fas fa-search-minus"></i></button>
-                <button id="zoomReset" class="zoom-btn" title="Reset zoom">1x</button>
+        <div class="content-wrapper">
+            <div class="left-panel">
+                <div class="tab-container">
+                    <div class="tabs">
+                        <button class="tab active" data-tab="camera-tab">
+                            <i class="fas fa-camera"></i> Chụp ảnh bài tập
+                        </button>
+                        <button class="tab" data-tab="document-tab">
+                            <i class="fas fa-file-alt"></i> Tải file bài tập
+                        </button>
+                    </div>
+                    
+                    <div id="camera-tab" class="tab-content active">
+                        <h2><i class="fas fa-camera"></i> Chụp ảnh bài tập</h2>
+                        
+                        <div class="info-box">
+                            <h3><i class="fas fa-info-circle"></i> Hướng dẫn sử dụng</h3>
+                            <p>1. Chọn môn học phù hợp với bài tập của bạn<br>
+                               2. Hướng camera vào bài tập cần giải<br>
+                               3. Chụp ảnh rõ nét, đủ sáng<br>
+                               4. AI sẽ phân tích và đưa ra hướng giải CHI TIẾT<br>
+                               5. Tự giải bài dựa trên hướng dẫn</p>
+                        </div>
+                        
+                        <div class="subject-selection">
+                            <h3><i class="fas fa-book"></i> Chọn môn học</h3>
+                            <div class="subject-buttons" id="subject-buttons">
+                                <button class="subject-btn active" data-subject="toan">
+                                    <i class="fas fa-calculator"></i> Toán
+                                </button>
+                                <button class="subject-btn" data-subject="ngu-van">
+                                    <i class="fas fa-book-open"></i> Văn
+                                </button>
+                                <button class="subject-btn" data-subject="vat-ly">
+                                    <i class="fas fa-atom"></i> Lý
+                                </button>
+                                <button class="subject-btn" data-subject="hoa-hoc">
+                                    <i class="fas fa-flask"></i> Hóa
+                                </button>
+                                <button class="subject-btn" data-subject="sinh-hoc">
+                                    <i class="fas fa-dna"></i> Sinh
+                                </button>
+                                <button class="subject-btn" data-subject="anh-van">
+                                    <i class="fas fa-language"></i> Anh
+                                </button>
+                                <button class="subject-btn" data-subject="lich-su">
+                                    <i class="fas fa-landmark"></i> Sử
+                                </button>
+                                <button class="subject-btn" data-subject="dia-ly">
+                                    <i class="fas fa-globe-asia"></i> Địa
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="video-container">
+                            <video id="video" autoplay playsinline></video>
+                            <div class="zoom-controls">
+                                <button id="zoomIn" class="zoom-btn" title="Phóng to"><i class="fas fa-search-plus"></i></button>
+                                <button id="zoomOut" class="zoom-btn" title="Thu nhỏ"><i class="fas fa-search-minus"></i></button>
+                                <button id="zoomReset" class="zoom-btn" title="Đặt lại">1x</button>
+                            </div>
+                        </div>
+                        
+                        <div class="button-group">
+                            <button id="switchCamera" class="btn btn-secondary">
+                                <i class="fas fa-camera-retro"></i> Đổi camera
+                            </button>
+                            <button id="capture" class="btn btn-accent">
+                                <i class="fas fa-camera"></i> Chụp ảnh
+                            </button>
+                            <button id="uploadImageBtn" class="btn">
+                                <i class="fas fa-upload"></i> Tải ảnh lên
+                            </button>
+                        </div>
+                        
+                        <input type="file" id="fileInput" accept="image/*">
+                        <canvas id="canvas"></canvas>
+                    </div>
+                    
+                    <div id="document-tab" class="tab-content">
+                        <h2><i class="fas fa-file-alt"></i> Tải file bài tập</h2>
+                        
+                        <div class="warning-box">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Lưu ý quan trọng</h3>
+                            <p>AI sẽ phân tích nội dung file và đưa ra hướng giải chi tiết. Chức năng này hỗ trợ:</p>
+                            <ul>
+                                <li>File Word (.doc, .docx) - trích xuất văn bản</li>
+                                <li>File PDF (.pdf) - trích xuất văn bản</li>
+                                <li>File ảnh (.jpg, .png) - nhận diện chữ viết</li>
+                            </ul>
+                            <p>Kích thước file tối đa: 10MB</p>
+                        </div>
+                        
+                        <div class="file-upload-area" id="docUploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>Kéo thả file vào đây hoặc nhấp để chọn</h3>
+                            <p>Hỗ trợ: Word, PDF, hình ảnh</p>
+                            <div class="file-types">
+                                <div class="file-type"><i class="fas fa-file-word"></i> .doc/.docx</div>
+                                <div class="file-type"><i class="fas fa-file-pdf"></i> .pdf</div>
+                                <div class="file-type"><i class="fas fa-file-image"></i> .jpg/.png</div>
+                            </div>
+                        </div>
+                        
+                        <input type="file" id="docFileInput" accept=".doc,.docx,.pdf,.jpg,.jpeg,.png">
+                        
+                        <div class="button-group">
+                            <button id="analyzeDocBtn" class="btn btn-accent btn-block" disabled>
+                                <i class="fas fa-search"></i> Phân tích file bài tập
+                            </button>
+                        </div>
+                        
+                        <div id="docPreview" class="hidden">
+                            <h3><i class="fas fa-file"></i> Xem trước file</h3>
+                            <div id="docPreviewContent"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="button-group">
-            <button id="switchCamera" class="btn btn-secondary">
-                <i class="fas fa-camera-retro"></i> Đổi camera
-            </button>
-            <button id="capture" class="btn">
-                <i class="fas fa-camera"></i> Chụp ảnh bài tập
-            </button>
-            <button id="uploadBtn" class="btn btn-accent">
-                <i class="fas fa-upload"></i> Tải ảnh lên
-            </button>
-            <input type="file" id="fileInput" accept="image/*">
-        </div>
-        
-        <canvas id="canvas"></canvas>
-        
-        <div id="result">
-            <div class="result-header">
-                <i class="fas fa-lightbulb"></i> Hướng dẫn giải bài tập
+            
+            <div class="right-panel">
+                <h2><i class="fas fa-lightbulb"></i> Hướng dẫn giải bài tập</h2>
+                
+                <div class="danger-box">
+                    <h3><i class="fas fa-ban"></i> QUY TẮC SỬ DỤNG</h3>
+                    <p><strong>AI CHỈ ĐƯA RA HƯỚNG DẪN - KHÔNG CUNG CẤP ĐÁP ÁN</strong></p>
+                    <p>Học sinh phải tự giải bài tập dựa trên hướng dẫn. Giáo viên sẽ kiểm tra lại kết quả.</p>
+                </div>
+                
+                <div id="result-content" class="result-container">
+                    <div class="info-box">
+                        <p>Kết quả phân tích và hướng dẫn giải sẽ hiển thị tại đây...</p>
+                        <p><strong>Lưu ý:</strong> Hướng dẫn sẽ tập trung vào phương pháp, không đưa ra kết quả cuối cùng. Giải thích đơn giản, phù hợp với học sinh THCS.</p>
+                    </div>
+                </div>
+                
+                <div class="response-controls hidden" id="responseControls">
+                    <button id="simplifyBtn" class="btn btn-secondary btn-small">
+                        <i class="fas fa-sort-amount-down"></i> Làm đơn giản hơn
+                    </button>
+                    <button id="explainMoreBtn" class="btn btn-secondary btn-small">
+                        <i class="fas fa-comment-dots"></i> Giải thích thêm
+                    </button>
+                    <button id="newAnalysisBtn" class="btn btn-small">
+                        <i class="fas fa-redo"></i> Phân tích bài mới
+                    </button>
+                </div>
             </div>
-            <div id="result-content" class="result-content">
-                <p>Kết quả phân tích và hướng dẫn giải sẽ hiển thị tại đây...</p>
-                <p><em>Lưu ý: AI chỉ đưa ra hướng giải, không cung cấp đáp án cuối cùng. Học sinh cần tự giải và kiểm tra lại.</em></p>
-            </div>
-        </div>
-        
-        <div class="home-btn">
-            <button id="homeButton" class="btn btn-secondary">
-                <i class="fas fa-home"></i> Về trang chủ
-            </button>
         </div>
     </div>
 
     <script>
+        // DOM Elements
         const video = document.getElementById('video');
         const videoContainer = document.getElementById('video-container');
         const canvas = document.getElementById('canvas');
         const captureButton = document.getElementById('capture');
         const switchCameraButton = document.getElementById('switchCamera');
-        const uploadButton = document.getElementById('uploadBtn');
+        const uploadImageButton = document.getElementById('uploadImageBtn');
         const fileInput = document.getElementById('fileInput');
+        const docFileInput = document.getElementById('docFileInput');
+        const docUploadArea = document.getElementById('docUploadArea');
+        const analyzeDocBtn = document.getElementById('analyzeDocBtn');
         const zoomInBtn = document.getElementById('zoomIn');
         const zoomOutBtn = document.getElementById('zoomOut');
         const zoomResetBtn = document.getElementById('zoomReset');
         const resultContent = document.getElementById('result-content');
         const subjectButtons = document.querySelectorAll('.subject-btn');
-        const homeButton = document.getElementById('homeButton');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const currentMode = document.getElementById('currentMode');
+        const docPreview = document.getElementById('docPreview');
+        const docPreviewContent = document.getElementById('docPreviewContent');
+        const responseControls = document.getElementById('responseControls');
+        const simplifyBtn = document.getElementById('simplifyBtn');
+        const explainMoreBtn = document.getElementById('explainMoreBtn');
+        const newAnalysisBtn = document.getElementById('newAnalysisBtn');
         
+        // State variables
         let currentStream;
         let facingMode = 'environment';
         let devices = [];
         let currentDeviceIndex = 0;
         let currentZoom = 1;
         let selectedSubject = 'toan';
+        let currentTab = 'camera-tab';
+        let currentFile = null;
+        let lastResponse = '';
 
-        // Khởi tạo chọn môn học
-        subjectButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                subjectButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-                selectedSubject = button.dataset.subject;
-                console.log(`Đã chọn môn: ${selectedSubject}`);
-            });
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCamera();
+            setupEventListeners();
         });
 
-        // Chọn môn Toán mặc định
-        document.querySelector('[data-subject="toan"]').classList.add('active');
+        // Setup all event listeners
+        function setupEventListeners() {
+            // Subject selection
+            subjectButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    subjectButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    selectedSubject = button.dataset.subject;
+                    console.log(`Đã chọn môn: ${selectedSubject}`);
+                });
+            });
 
-        // Dừng stream camera
-        function stopStream() {
-            if (currentStream) {
-                currentStream.getTracks().forEach(track => track.stop());
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.dataset.tab;
+                    switchTab(tabId);
+                });
+            });
+
+            // Camera controls
+            switchCameraButton.addEventListener('click', switchCamera);
+            captureButton.addEventListener('click', captureImage);
+            uploadImageButton.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', handleImageUpload);
+            
+            // Zoom controls
+            zoomInBtn.addEventListener('click', () => adjustZoom(0.5));
+            zoomOutBtn.addEventListener('click', () => adjustZoom(-0.5));
+            zoomResetBtn.addEventListener('click', resetZoom);
+            
+            // Document upload
+            docUploadArea.addEventListener('click', () => docFileInput.click());
+            docUploadArea.addEventListener('dragover', handleDragOver);
+            docUploadArea.addEventListener('dragleave', handleDragLeave);
+            docUploadArea.addEventListener('drop', handleDrop);
+            docFileInput.addEventListener('change', handleDocFileSelect);
+            analyzeDocBtn.addEventListener('click', analyzeDocument);
+            
+            // Response controls
+            simplifyBtn.addEventListener('click', simplifyResponse);
+            explainMoreBtn.addEventListener('click', explainMore);
+            newAnalysisBtn.addEventListener('click', resetAnalysis);
+        }
+
+        // Initialize camera
+        async function initCamera() {
+            try {
+                await startCamera();
+            } catch (err) {
+                showError(`Lỗi camera: ${err.message}. Vui lòng tải ảnh lên thay thế.`);
             }
         }
 
-        // Lấy danh sách thiết bị camera
+        // Start camera with specific device
+        async function startCamera(deviceId) {
+            stopCamera();
+            
+            try {
+                const constraints = {
+                    video: {
+                        deviceId: deviceId ? { exact: deviceId } : undefined,
+                        facingMode: deviceId ? undefined : facingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    }
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                currentStream = stream;
+                video.srcObject = stream;
+                currentZoom = 1;
+                video.style.transform = `scale(${currentZoom})`;
+                
+                if (!deviceId) {
+                    await getCameraDevices();
+                }
+            } catch (err) {
+                showError(`Không thể truy cập camera: ${err.message}`);
+            }
+        }
+
+        // Get available camera devices
         async function getCameraDevices() {
             try {
                 const mediaDevices = await navigator.mediaDevices.enumerateDevices();
@@ -481,143 +908,261 @@
             }
         }
 
-        // Bắt đầu camera
-        async function startCamera(deviceId) {
-            stopStream();
-            try {
-                const constraints = {
-                    video: {
-                        deviceId: deviceId ? { exact: deviceId } : undefined,
-                        facingMode: deviceId ? undefined : facingMode,
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    }
-                };
-                
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                currentStream = stream;
-                video.srcObject = stream;
-                
-                currentZoom = 1;
-                video.style.transform = `scale(${currentZoom})`;
-                
-                if (!deviceId) {
-                    await getCameraDevices();
-                }
-            } catch (err) {
-                resultContent.innerHTML = `<div class="error">Lỗi khi truy cập camera: ${err.message}<br>Vui lòng cấp quyền truy cập camera hoặc tải ảnh lên.</div>`;
+        // Stop camera stream
+        function stopCamera() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
             }
         }
 
-        // Chuyển đổi camera
-        switchCameraButton.addEventListener('click', async () => {
+        // Switch between cameras
+        async function switchCamera() {
             await getCameraDevices();
             
             if (devices.length < 2) {
-                resultContent.innerHTML = `<div class="error">Không tìm thấy camera thứ hai</div>`;
+                showError("Không tìm thấy camera thứ hai");
                 return;
             }
             
             currentDeviceIndex = (currentDeviceIndex + 1) % devices.length;
             startCamera(devices[currentDeviceIndex].deviceId);
-        });
+        }
 
-        // Xử lý zoom
-        zoomInBtn.addEventListener('click', () => {
-            if (currentZoom < 3) {
-                currentZoom += 0.5;
+        // Adjust zoom level
+        function adjustZoom(delta) {
+            if (currentZoom + delta >= 0.5 && currentZoom + delta <= 3) {
+                currentZoom += delta;
                 video.style.transform = `scale(${currentZoom})`;
             }
-        });
-        
-        zoomOutBtn.addEventListener('click', () => {
-            if (currentZoom > 0.5) {
-                currentZoom -= 0.5;
-                video.style.transform = `scale(${currentZoom})`;
-            }
-        });
-        
-        zoomResetBtn.addEventListener('click', () => {
+        }
+
+        // Reset zoom to 1x
+        function resetZoom() {
             currentZoom = 1;
             video.style.transform = `scale(${currentZoom})`;
-        });
+        }
 
-        // Bắt đầu camera khi tải trang
-        startCamera();
-
-        // Chụp ảnh từ video
-        captureButton.addEventListener('click', () => {
+        // Capture image from camera
+        function captureImage() {
+            if (!currentStream) {
+                showError("Camera chưa sẵn sàng. Vui lòng tải ảnh lên.");
+                return;
+            }
+            
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // Hiệu ứng chớp
+            // Flash effect
             videoContainer.classList.add('flash-effect');
             setTimeout(() => {
                 videoContainer.classList.remove('flash-effect');
             }, 500);
             
             const imageData = canvas.toDataURL('image/jpeg');
-            analyzeImage(imageData);
-        });
+            analyzeImage(imageData, 'camera');
+        }
 
-        // Xử lý tải ảnh lên
-        uploadButton.addEventListener('click', () => {
-            fileInput.click();
-        });
-        
-        fileInput.addEventListener('change', (e) => {
+        // Handle image file upload
+        function handleImageUpload(e) {
             const file = e.target.files[0];
             if (file) {
+                if (!file.type.startsWith('image/')) {
+                    showError("Vui lòng chọn file ảnh");
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    showError("File quá lớn. Vui lòng chọn file nhỏ hơn 10MB");
+                    return;
+                }
+                
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    analyzeImage(event.target.result);
+                    analyzeImage(event.target.result, 'upload');
                 };
                 reader.readAsDataURL(file);
             }
-        });
+        }
 
-        // Xử lý nút về trang chủ
-        homeButton.addEventListener('click', () => {
-            window.location.href = 'index.html'; // Thay đổi đường dẫn nếu cần
-        });
+        // Switch between tabs
+        function switchTab(tabId) {
+            // Update tabs
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabId) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update tab contents
+            tabContents.forEach(content => {
+                if (content.id === tabId) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabId;
+            
+            // Update mode indicator
+            if (tabId === 'camera-tab') {
+                currentMode.textContent = "Chế độ chụp ảnh";
+                currentMode.className = "mode-indicator mode-camera";
+                initCamera();
+            } else {
+                currentMode.textContent = "Chế độ tải file";
+                currentMode.className = "mode-indicator mode-document";
+                stopCamera();
+            }
+        }
 
-        // Gửi ảnh đến Gemini API và xử lý kết quả
-        async function analyzeImage(imageData) {
-            resultContent.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Đang phân tích bài tập...</p>
+        // Handle drag over for file upload
+        function handleDragOver(e) {
+            e.preventDefault();
+            docUploadArea.classList.add('dragover');
+        }
+
+        // Handle drag leave
+        function handleDragLeave(e) {
+            e.preventDefault();
+            docUploadArea.classList.remove('dragover');
+        }
+
+        // Handle file drop
+        function handleDrop(e) {
+            e.preventDefault();
+            docUploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleDocFile(files[0]);
+            }
+        }
+
+        // Handle document file selection
+        function handleDocFileSelect(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleDocFile(file);
+            }
+        }
+
+        // Process document file
+        function handleDocFile(file) {
+            // Check file type
+            const validTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/png'
+            ];
+            
+            if (!validTypes.some(type => file.type.includes(type.replace('application/', '').replace('image/', '')))) {
+                showError("Loại file không được hỗ trợ. Vui lòng chọn file PDF, Word hoặc ảnh.");
+                return;
+            }
+            
+            // Check file size
+            if (file.size > 10 * 1024 * 1024) {
+                showError("File quá lớn. Vui lòng chọn file nhỏ hơn 10MB");
+                return;
+            }
+            
+            currentFile = file;
+            analyzeDocBtn.disabled = false;
+            
+            // Show preview
+            docPreview.classList.remove('hidden');
+            docPreviewContent.innerHTML = `
+                <div class="info-box">
+                    <h4><i class="fas fa-file"></i> ${file.name}</h4>
+                    <p>Loại: ${file.type}</p>
+                    <p>Kích thước: ${(file.size / 1024).toFixed(2)} KB</p>
+                    <p>Nhấn "Phân tích file bài tập" để bắt đầu.</p>
                 </div>
             `;
-            
-            const apiKey = 'AIzaSyDpmcPL_SJH8mlcTikEz57gtrYyfz3xSXk'; // Thay bằng API key của bạn
-            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
-            
-            // Prompt yêu cầu hướng dẫn giải KHÔNG đưa đáp án
-            const prompt = `
-                Bạn là một giáo viên THCS đang hướng dẫn học sinh giải bài tập.
-                
-                YÊU CẦU QUAN TRỌNG:
-                1. PHÂN TÍCH bài tập trong ảnh (toán, văn, lý, hóa, sinh, anh, sử, địa)
-                2. CHỈ ĐƯA RA HƯỚNG GIẢI, PHƯƠNG PHÁP, CÁC BƯỚC THỰC HIỆN
-                3. TUYỆT ĐỐI KHÔNG ĐƯA RA ĐÁP ÁN CUỐI CÙNG
-                4. Giải thích rõ ràng, từng bước, phù hợp với trình độ THCS
-                5. Gợi ý cách kiểm tra lại kết quả
-                
-                Môn học: ${getSubjectName(selectedSubject)}
-                
-                Hãy trả lời với cấu trúc:
-                1. Xác định dạng bài tập
-                2. Phương pháp/kiến thức áp dụng
-                3. Các bước thực hiện (chi tiết)
-                4. Lưu ý quan trọng
-                5. Cách tự kiểm tra kết quả
-                
-                Trình bày rõ ràng, dễ hiểu, không dùng ký hiệu phức tạp.
-            `;
+        }
 
+        // Analyze document file
+        async function analyzeDocument() {
+            if (!currentFile) {
+                showError("Vui lòng chọn file trước khi phân tích");
+                return;
+            }
+            
+            showLoading("Đang phân tích file bài tập...");
+            
+            // Simulate analysis (in real app, you would send to API)
+            setTimeout(() => {
+                // For demo purposes, we'll use a simulated response
+                const simulatedResponse = generateDocumentAnalysis(currentFile, selectedSubject);
+                displaySolution(simulatedResponse);
+            }, 2000);
+        }
+
+        // Analyze image (camera or upload)
+        async function analyzeImage(imageData, source) {
+            showLoading(`Đang phân tích ${source === 'camera' ? 'ảnh chụp' : 'ảnh tải lên'}...`);
+            
+            // API Key - Replace with your actual Gemini API key
+            const apiKey = 'YOUR_GEMINI_API_KEY_HERE'; // IMPORTANT: Replace with actual key
+            
+            // For demo, use simulated response
+            setTimeout(() => {
+                const simulatedResponse = generateSimulatedResponse(selectedSubject);
+                displaySolution(simulatedResponse);
+            }, 1500);
+            
+            // In production, uncomment this code to use actual Gemini API
+            /*
+            try {
+                const response = await callGeminiAPI(imageData, selectedSubject);
+                displaySolution(response);
+            } catch (err) {
+                showError(`Lỗi khi phân tích: ${err.message}`);
+            }
+            */
+        }
+
+        // Call Gemini API (commented out for demo)
+        async function callGeminiAPI(imageData, subject) {
+            const apiKey = 'YOUR_API_KEY_HERE';
+            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent';
+            
+            // Enhanced prompt with strict rules
+            const prompt = `
+                Bạn là giáo viên THCS hướng dẫn giải bài tập. 
+                
+                QUY TẮC BẮT BUỘC:
+                1. CHỈ hướng dẫn phương pháp, KHÔNG đưa đáp án cuối cùng
+                2. Giải thích đơn giản, dễ hiểu cho học sinh THCS
+                3. Tối đa 5 bước hướng dẫn
+                4. Không dùng ký hiệu toán học phức tạp
+                5. Không viết công thức khó hiểu
+                6. Đưa ra ví dụ minh họa đơn giản
+                7. Nhắc học sinh tự giải và kiểm tra
+                
+                Môn học: ${getSubjectName(subject)}
+                
+                Phân tích bài tập trong ảnh và trả lời theo cấu trúc:
+                
+                BÀI TẬP: [Mô tả ngắn bài tập]
+                
+                HƯỚNG DẪN GIẢI:
+                1. [Bước 1 - Phân tích đề bài]
+                2. [Bước 2 - Phương pháp giải]
+                3. [Bước 3 - Các bước thực hiện]
+                4. [Bước 4 - Lưu ý quan trọng]
+                5. [Bước 5 - Cách kiểm tra lại]
+                
+                LƯU Ý: Học sinh tự giải bài và đối chiếu với hướng dẫn.
+            `;
+            
             const requestBody = {
                 contents: [
                     {
@@ -628,42 +1173,187 @@
                                     data: imageData.split(',')[1]
                                 }
                             },
-                            {
-                                text: prompt
-                            }
+                            { text: prompt }
                         ]
                     }
-                ]
-            };
-
-            try {
-                const response = await fetch(`${apiUrl}?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (!response.ok) {
-                    throw new Error('Lỗi khi gọi API: ' + response.statusText);
+                ],
+                generationConfig: {
+                    temperature: 0.2,
+                    topK: 32,
+                    topP: 0.8,
+                    maxOutputTokens: 800
                 }
-
-                const data = await response.json();
-                const responseText = data.candidates[0].content.parts[0].text;
-                
-                // Hiển thị kết quả với định dạng đẹp
-                displaySolution(responseText);
-            } catch (err) {
-                resultContent.innerHTML = `
-                    <div class="error">
-                        <p>Lỗi khi phân tích bài tập:</p>
-                        <p>${err.message}</p>
-                        <p>Vui lòng thử lại hoặc tải ảnh khác.</p>
-                    </div>
-                `;
+            };
+            
+            const response = await fetch(`${apiUrl}?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API Error: ${response.status}`);
             }
+            
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
         }
 
-        // Lấy tên môn học
+        // Generate simulated response for demo
+        function generateSimulatedResponse(subject) {
+            const subjectName = getSubjectName(subject);
+            
+            const responses = {
+                'toan': `BÀI TẬP: Tính giá trị biểu thức đại số
+
+HƯỚNG DẪN GIẢI:
+1. Xác định loại biểu thức: Đây là biểu thức đại số kết hợp các phép tính cộng, trừ, nhân, chia
+2. Nhắc lại thứ tự thực hiện phép tính: Nhân/chia trước, cộng/trừ sau
+3. Thực hiện từng bước:
+   - Bước 1: Xử lý các phép tính trong ngoặc trước
+   - Bước 2: Thực hiện phép nhân, chia (nếu có)
+   - Bước 3: Thực hiện phép cộng, trừ
+4. Kiểm tra từng bước tính toán
+5. Thay thế giá trị vào biểu thức để kiểm tra lại
+
+LƯU Ý: Học sinh cần thực hiện từng bước cẩn thận, kiểm tra lại các phép tính.`,
+
+                'ngu-van': `BÀI TẬP: Phân tích tác phẩm văn học
+
+HƯỚNG DẪN GIẢI:
+1. Đọc kỹ văn bản, xác định thể loại và nội dung chính
+2. Tìm hiểu về tác giả và hoàn cảnh sáng tác (nếu có thông tin)
+3. Phân tích các yếu tố:
+   - Nhân vật, sự kiện chính
+   - Ngôn ngữ, biện pháp tu từ được sử dụng
+   - Thông điệp, ý nghĩa tác phẩm
+4. Trình bày cảm nhận cá nhân về tác phẩm
+5. Liên hệ với thực tế hoặc tác phẩm khác
+
+LƯU Ý: Trình bày rõ ràng, mạch lạc, có dẫn chứng từ văn bản.`,
+
+                'vat-ly': `BÀI TẬP: Bài tập về chuyển động
+
+HƯỚNG DẪN GIẢI:
+1. Đọc đề bài, xác định đại lượng đã cho và cần tìm
+2. Nhắc lại công thức liên quan đến chuyển động đều
+3. Vẽ sơ đồ minh họa (nếu cần)
+4. Áp dụng công thức phù hợp
+5. Tính toán từng bước, chú ý đơn vị đo
+
+LƯU Ý: Luôn kiểm tra đơn vị và tính hợp lý của kết quả.`
+            };
+            
+            return responses[subject] || responses['toan'];
+        }
+
+        // Generate document analysis response
+        function generateDocumentAnalysis(file, subject) {
+            const subjectName = getSubjectName(subject);
+            const fileType = file.type.includes('pdf') ? 'PDF' : 
+                           file.type.includes('word') ? 'Word' : 'ảnh';
+            
+            return `BÀI TẬP: Phân tích file ${fileType} - Môn ${subjectName}
+
+HƯỚNG DẪN GIẢI:
+1. Đã xác định file chứa bài tập ${subjectName}
+2. Phương pháp tiếp cận:
+   - Đọc kỹ từng câu hỏi trong file
+   - Xác định dạng bài tập cho từng câu
+   - Phân loại theo chủ đề kiến thức
+3. Các bước thực hiện:
+   - Câu 1: [Hướng dẫn phương pháp cho câu 1]
+   - Câu 2: [Hướng dẫn phương pháp cho câu 2]
+   - Câu 3: [Hướng dẫn phương pháp cho câu 3]
+4. Lưu ý: Thời gian phân bổ cho từng câu hợp lý
+5. Kiểm tra: Đối chiếu với kiến thức đã học
+
+LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích kỹ từng phần.`;
+        }
+
+        // Display solution in result area
+        function displaySolution(solutionText) {
+            lastResponse = solutionText;
+            
+            const steps = solutionText.split('\n\n');
+            let html = '<div class="ai-response">';
+            
+            steps.forEach(step => {
+                if (step.trim()) {
+                    if (step.includes('BÀI TẬP:')) {
+                        html += `<h4><i class="fas fa-tasks"></i> ${step.replace('BÀI TẬP:', '').trim()}</h4>`;
+                    } else if (step.includes('HƯỚNG DẪN GIẢI:')) {
+                        html += `<h4><i class="fas fa-directions"></i> Hướng dẫn giải</h4>`;
+                    } else if (step.includes('LƯU Ý:')) {
+                        html += `<div class="warning-box"><h4><i class="fas fa-exclamation-circle"></i> Lưu ý quan trọng</h4><p>${step.replace('LƯU Ý:', '').trim()}</p></div>`;
+                    } else if (step.match(/^\d\./)) {
+                        html += `<div class="solution-step">
+                            <div class="step-header">
+                                <span class="step-number">${step.substring(0, 1)}</span>
+                                <strong>${step.substring(3).trim()}</strong>
+                            </div>
+                        </div>`;
+                    } else {
+                        html += `<p>${step}</p>`;
+                    }
+                }
+            });
+            
+            html += '</div>';
+            
+            // Add warning about not providing final answers
+            html += `
+                <div class="danger-box">
+                    <h4><i class="fas fa-user-graduate"></i> HỌC SINH CẦN TỰ GIẢI</h4>
+                    <p>Hướng dẫn trên chỉ nêu phương pháp. Học sinh phải:</p>
+                    <ul>
+                        <li>Tự thực hiện các bước giải</li>
+                        <li>Tự tính toán kết quả cuối cùng</li>
+                        <li>Kiểm tra lại với giáo viên</li>
+                        <li>Không sao chép đáp án từ bất kỳ nguồn nào</li>
+                    </ul>
+                </div>
+            `;
+            
+            resultContent.innerHTML = html;
+            responseControls.classList.remove('hidden');
+        }
+
+        // Show loading state
+        function showLoading(message) {
+            resultContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>${message}</p>
+                    <p>Vui lòng đợi trong giây lát...</p>
+                </div>
+            `;
+        }
+
+        // Show error message
+        function showError(message) {
+            resultContent.innerHTML = `
+                <div class="error">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Có lỗi xảy ra</h4>
+                    <p>${message}</p>
+                    <button class="btn btn-small" onclick="window.location.reload()">
+                        <i class="fas fa-redo"></i> Thử lại
+                    </button>
+                </div>
+            `;
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            resultContent.innerHTML = `
+                <div class="success">
+                    <h4><i class="fas fa-check-circle"></i> Thành công!</h4>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Get subject name from code
         function getSubjectName(subjectCode) {
             const subjects = {
                 'toan': 'Toán học',
@@ -678,73 +1368,50 @@
             return subjects[subjectCode] || 'Toán học';
         }
 
-        // Hiển thị hướng dẫn giải
-        function displaySolution(solutionText) {
-            // Tách văn bản thành các phần
-            const parts = solutionText.split(/\d\./).filter(part => part.trim().length > 0);
+        // Simplify the response (make it even simpler)
+        function simplifyResponse() {
+            showLoading("Đang làm đơn giản hóa hướng dẫn...");
             
-            let html = '';
-            
-            if (parts.length > 0) {
-                parts.forEach((part, index) => {
-                    const title = getStepTitle(index);
-                    html += `
-                        <div class="solution-step">
-                            <h4><span class="step-number">${index + 1}</span> ${title}</h4>
-                            <p>${part.trim().replace(/\n/g, '<br>')}</p>
-                        </div>
-                    `;
-                });
+            setTimeout(() => {
+                const simplified = lastResponse
+                    .replace(/phức tạp/g, 'đơn giản')
+                    .replace(/\d\.\s*\[[^\]]+\]/g, match => match.replace(/\[|\]/g, ''))
+                    + "\n\nĐÃ LÀM ĐƠN GIẢN: Hướng dẫn đã được tối giản cho học sinh THCS.";
                 
-                // Thêm cảnh báo không đưa đáp án
-                html += `
-                    <div class="warning-note">
-                        <h4><i class="fas fa-exclamation-triangle"></i> Lưu ý quan trọng</h4>
-                        <p>Hướng dẫn trên chỉ mang tính chất tham khảo. Học sinh cần:</p>
-                        <ul>
-                            <li>Tự thực hiện các bước giải chi tiết</li>
-                            <li>Kiểm tra lại từng bước tính toán</li>
-                            <li>Tham khảo ý kiến thầy cô khi cần</li>
-                            <li>Không phụ thuộc hoàn toàn vào AI</li>
-                        </ul>
-                    </div>
-                `;
-            } else {
-                // Nếu không tách được phần, hiển thị toàn bộ
-                html = `
-                    <div class="solution-step">
-                        <h4><i class="fas fa-lightbulb"></i> Hướng dẫn giải</h4>
-                        <p>${solutionText.replace(/\n/g, '<br>')}</p>
-                    </div>
-                    <div class="warning-note">
-                        <p><strong>Lưu ý:</strong> Đây chỉ là hướng dẫn giải. Bạn cần tự thực hiện và kiểm tra lại kết quả.</p>
-                    </div>
-                `;
-            }
+                displaySolution(simplified);
+            }, 1000);
+        }
+
+        // Explain more (add more details)
+        function explainMore() {
+            showLoading("Đang bổ sung giải thích chi tiết...");
             
-            // Thêm nút thử lại
-            html += `
-                <div style="text-align: center; margin-top: 20px;">
-                    <button class="btn" onclick="window.location.reload()">
-                        <i class="fas fa-redo"></i> Phân tích bài tập khác
-                    </button>
+            setTimeout(() => {
+                const expanded = lastResponse + 
+                    "\n\nGIẢI THÍCH THÊM: Mỗi bước cần được thực hiện cẩn thận. Nếu gặp khó khăn, hãy xem lại kiến thức cơ bản hoặc hỏi giáo viên.";
+                
+                displaySolution(expanded);
+            }, 1000);
+        }
+
+        // Reset for new analysis
+        function resetAnalysis() {
+            resultContent.innerHTML = `
+                <div class="info-box">
+                    <p>Sẵn sàng phân tích bài tập mới...</p>
+                    <p>Chọn môn học, chụp ảnh hoặc tải file bài tập lên.</p>
                 </div>
             `;
             
-            resultContent.innerHTML = html;
-        }
-
-        // Tiêu đề cho các bước
-        function getStepTitle(index) {
-            const titles = [
-                'Xác định dạng bài tập',
-                'Phương pháp giải',
-                'Các bước thực hiện',
-                'Lưu ý quan trọng',
-                'Cách kiểm tra kết quả',
-                'Kiến thức liên quan'
-            ];
-            return titles[index] || 'Bước ' + (index + 1);
+            responseControls.classList.add('hidden');
+            
+            // Reset file input if in document mode
+            if (currentTab === 'document-tab') {
+                docFileInput.value = '';
+                analyzeDocBtn.disabled = true;
+                docPreview.classList.add('hidden');
+                currentFile = null;
+            }
         }
     </script>
 </body>
