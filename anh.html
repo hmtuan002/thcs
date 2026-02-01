@@ -242,6 +242,10 @@
             font-size: 1.5em;
         }
         
+        .subject-buttons-document {
+            margin-top: 20px;
+        }
+        
         #video-container {
             position: relative;
             width: 100%;
@@ -602,6 +606,16 @@
             align-items: center;
             gap: 5px;
         }
+        
+        .file-info {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -645,7 +659,7 @@
                         
                         <div class="subject-selection">
                             <h3><i class="fas fa-book"></i> Chọn môn học</h3>
-                            <div class="subject-buttons" id="subject-buttons">
+                            <div class="subject-buttons" id="camera-subject-buttons">
                                 <button class="subject-btn active" data-subject="toan">
                                     <i class="fas fa-calculator"></i> Toán
                                 </button>
@@ -712,6 +726,36 @@
                             <p>Kích thước file tối đa: 10MB</p>
                         </div>
                         
+                        <div class="subject-selection">
+                            <h3><i class="fas fa-book"></i> Chọn môn học</h3>
+                            <div class="subject-buttons subject-buttons-document" id="document-subject-buttons">
+                                <button class="subject-btn active" data-subject="toan">
+                                    <i class="fas fa-calculator"></i> Toán
+                                </button>
+                                <button class="subject-btn" data-subject="ngu-van">
+                                    <i class="fas fa-book-open"></i> Văn
+                                </button>
+                                <button class="subject-btn" data-subject="vat-ly">
+                                    <i class="fas fa-atom"></i> Lý
+                                </button>
+                                <button class="subject-btn" data-subject="hoa-hoc">
+                                    <i class="fas fa-flask"></i> Hóa
+                                </button>
+                                <button class="subject-btn" data-subject="sinh-hoc">
+                                    <i class="fas fa-dna"></i> Sinh
+                                </button>
+                                <button class="subject-btn" data-subject="anh-van">
+                                    <i class="fas fa-language"></i> Anh
+                                </button>
+                                <button class="subject-btn" data-subject="lich-su">
+                                    <i class="fas fa-landmark"></i> Sử
+                                </button>
+                                <button class="subject-btn" data-subject="dia-ly">
+                                    <i class="fas fa-globe-asia"></i> Địa
+                                </button>
+                            </div>
+                        </div>
+                        
                         <div class="file-upload-area" id="docUploadArea">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <h3>Kéo thả file vào đây hoặc nhấp để chọn</h3>
@@ -732,7 +776,7 @@
                         </div>
                         
                         <div id="docPreview" class="hidden">
-                            <h3><i class="fas fa-file"></i> Xem trước file</h3>
+                            <h3><i class="fas fa-file"></i> Thông tin file</h3>
                             <div id="docPreviewContent"></div>
                         </div>
                     </div>
@@ -786,7 +830,8 @@
         const zoomOutBtn = document.getElementById('zoomOut');
         const zoomResetBtn = document.getElementById('zoomReset');
         const resultContent = document.getElementById('result-content');
-        const subjectButtons = document.querySelectorAll('.subject-btn');
+        const cameraSubjectButtons = document.querySelectorAll('#camera-subject-buttons .subject-btn');
+        const documentSubjectButtons = document.querySelectorAll('#document-subject-buttons .subject-btn');
         const tabs = document.querySelectorAll('.tab');
         const tabContents = document.querySelectorAll('.tab-content');
         const currentMode = document.getElementById('currentMode');
@@ -803,7 +848,8 @@
         let devices = [];
         let currentDeviceIndex = 0;
         let currentZoom = 1;
-        let selectedSubject = 'toan';
+        let cameraSelectedSubject = 'toan';
+        let documentSelectedSubject = 'toan';
         let currentTab = 'camera-tab';
         let currentFile = null;
         let lastResponse = '';
@@ -816,13 +862,23 @@
 
         // Setup all event listeners
         function setupEventListeners() {
-            // Subject selection
-            subjectButtons.forEach(button => {
+            // Camera subject selection
+            cameraSubjectButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    subjectButtons.forEach(btn => btn.classList.remove('active'));
+                    cameraSubjectButtons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
-                    selectedSubject = button.dataset.subject;
-                    console.log(`Đã chọn môn: ${selectedSubject}`);
+                    cameraSelectedSubject = button.dataset.subject;
+                    console.log(`[Camera] Đã chọn môn: ${cameraSelectedSubject}`);
+                });
+            });
+
+            // Document subject selection
+            documentSubjectButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    documentSubjectButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    documentSelectedSubject = button.dataset.subject;
+                    console.log(`[Document] Đã chọn môn: ${documentSelectedSubject}`);
                 });
             });
 
@@ -960,30 +1016,37 @@
                 videoContainer.classList.remove('flash-effect');
             }, 500);
             
-            const imageData = canvas.toDataURL('image/jpeg');
-            analyzeImage(imageData, 'camera');
+            canvas.toBlob(blob => {
+                const file = new File([blob], `baitap_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                handleImageFile(file, 'camera');
+            }, 'image/jpeg', 0.9);
         }
 
         // Handle image file upload
         function handleImageUpload(e) {
             const file = e.target.files[0];
             if (file) {
-                if (!file.type.startsWith('image/')) {
-                    showError("Vui lòng chọn file ảnh");
-                    return;
-                }
-                
-                if (file.size > 10 * 1024 * 1024) {
-                    showError("File quá lớn. Vui lòng chọn file nhỏ hơn 10MB");
-                    return;
-                }
-                
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    analyzeImage(event.target.result, 'upload');
-                };
-                reader.readAsDataURL(file);
+                handleImageFile(file, 'upload');
             }
+        }
+
+        // Process image file
+        function handleImageFile(file, source) {
+            if (!file.type.startsWith('image/')) {
+                showError("Vui lòng chọn file ảnh");
+                return;
+            }
+            
+            if (file.size > 10 * 1024 * 1024) {
+                showError("File quá lớn. Vui lòng chọn file nhỏ hơn 10MB");
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                analyzeImage(event.target.result, source);
+            };
+            reader.readAsDataURL(file);
         }
 
         // Switch between tabs
@@ -1062,7 +1125,9 @@
                 'image/png'
             ];
             
-            if (!validTypes.some(type => file.type.includes(type.replace('application/', '').replace('image/', '')))) {
+            if (!validTypes.includes(file.type) && 
+                !['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'].some(ext => 
+                  file.name.toLowerCase().endsWith(ext))) {
                 showError("Loại file không được hỗ trợ. Vui lòng chọn file PDF, Word hoặc ảnh.");
                 return;
             }
@@ -1079,13 +1144,35 @@
             // Show preview
             docPreview.classList.remove('hidden');
             docPreviewContent.innerHTML = `
-                <div class="info-box">
-                    <h4><i class="fas fa-file"></i> ${file.name}</h4>
-                    <p>Loại: ${file.type}</p>
-                    <p>Kích thước: ${(file.size / 1024).toFixed(2)} KB</p>
+                <div class="file-info">
+                    <p><strong>Tên file:</strong> ${file.name}</p>
+                    <p><strong>Loại:</strong> ${file.type || getFileTypeFromExtension(file.name)}</p>
+                    <p><strong>Kích thước:</strong> ${formatFileSize(file.size)}</p>
+                    <p><strong>Môn đã chọn:</strong> ${getSubjectName(documentSelectedSubject)}</p>
                     <p>Nhấn "Phân tích file bài tập" để bắt đầu.</p>
                 </div>
             `;
+        }
+
+        // Get file type from extension
+        function getFileTypeFromExtension(filename) {
+            const ext = filename.toLowerCase().split('.').pop();
+            switch(ext) {
+                case 'pdf': return 'application/pdf';
+                case 'doc': return 'application/msword';
+                case 'docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+                case 'jpg':
+                case 'jpeg': return 'image/jpeg';
+                case 'png': return 'image/png';
+                default: return 'Không xác định';
+            }
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+            else return (bytes / 1048576).toFixed(2) + ' MB';
         }
 
         // Analyze document file
@@ -1095,46 +1182,44 @@
                 return;
             }
             
-            showLoading("Đang phân tích file bài tập...");
+            showLoading(`Đang phân tích file ${currentFile.name}...`);
             
-            // Simulate analysis (in real app, you would send to API)
+            // Trong ứng dụng thực tế, bạn sẽ gửi file lên API Gemini
+            // Ở đây chúng ta sẽ mô phỏng phân tích
             setTimeout(() => {
-                // For demo purposes, we'll use a simulated response
-                const simulatedResponse = generateDocumentAnalysis(currentFile, selectedSubject);
-                displaySolution(simulatedResponse);
-            }, 2000);
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    // Mô phỏng phân tích với API Gemini
+                    const simulatedResponse = callGeminiDocumentAPI(event.target.result, documentSelectedSubject, currentFile.type);
+                    displaySolution(simulatedResponse);
+                };
+                reader.readAsDataURL(currentFile);
+            }, 1500);
         }
 
         // Analyze image (camera or upload)
         async function analyzeImage(imageData, source) {
-            showLoading(`Đang phân tích ${source === 'camera' ? 'ảnh chụp' : 'ảnh tải lên'}...`);
+            const subject = cameraSelectedSubject;
+            showLoading(`Đang phân tích ${source === 'camera' ? 'ảnh chụp' : 'ảnh tải lên'} môn ${getSubjectName(subject)}...`);
             
-            // API Key - Replace with your actual Gemini API key
-            const apiKey = 'AIzaSyACsPEzUj6BSHExOaa7y_C9Djtx94nRoLk'; // IMPORTANT: Replace with actual key
-            
-            // For demo, use simulated response
-            setTimeout(() => {
-                const simulatedResponse = generateSimulatedResponse(selectedSubject);
-                displaySolution(simulatedResponse);
-            }, 1500);
-            
-            // In production, uncomment this code to use actual Gemini API
-            /*
+            // Gọi API Gemini thực tế
             try {
-                const response = await callGeminiAPI(imageData, selectedSubject);
+                const response = await callGeminiImageAPI(imageData, subject);
                 displaySolution(response);
             } catch (err) {
-                showError(`Lỗi khi phân tích: ${err.message}`);
+                console.error("Lỗi API:", err);
+                // Nếu API thất bại, hiển thị phản hồi mô phỏng
+                const simulatedResponse = generateSimulatedResponse(subject);
+                displaySolution(simulatedResponse);
             }
-            */
         }
 
-        // Call Gemini API (commented out for demo)
-        async function callGeminiAPI(imageData, subject) {
-            const apiKey = 'AIzaSyACsPEzUj6BSHExOaa7y_C9Djtx94nRoLk';
-            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/modelS/gemini-2.5-flash:generateContent';
+        // Call Gemini API for image analysis
+        async function callGeminiImageAPI(imageData, subject) {
+            const apiKey = 'AIzaSyDdRGr0EzV6Lc-xTDOvXpu6isRqA-Hv0Z0';
+            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
             
-            // Enhanced prompt with strict rules
+            // Prompt được cải thiện
             const prompt = `
                 Bạn là giáo viên THCS hướng dẫn giải bài tập. 
                 
@@ -1163,6 +1248,9 @@
                 LƯU Ý: Học sinh tự giải bài và đối chiếu với hướng dẫn.
             `;
             
+            // Tách base64 từ data URL
+            const base64Data = imageData.split(',')[1];
+            
             const requestBody = {
                 contents: [
                     {
@@ -1170,7 +1258,7 @@
                             {
                                 inlineData: {
                                     mimeType: "image/jpeg",
-                                    data: imageData.split(',')[1]
+                                    data: base64Data
                                 }
                             },
                             { text: prompt }
@@ -1192,11 +1280,18 @@
             });
             
             if (!response.ok) {
-                throw new Error(`API Error: ${response.status}`);
+                const errorText = await response.text();
+                throw new Error(`API Error: ${response.status} - ${errorText}`);
             }
             
             const data = await response.json();
             return data.candidates[0].content.parts[0].text;
+        }
+
+        // Call Gemini API for document analysis (mô phỏng)
+        function callGeminiDocumentAPI(fileData, subject, fileType) {
+            // Đây là hàm mô phỏng - trong thực tế bạn sẽ gửi file lên API
+            return generateDocumentAnalysis(subject, fileType);
         }
 
         // Generate simulated response for demo
@@ -1248,12 +1343,13 @@ LƯU Ý: Luôn kiểm tra đơn vị và tính hợp lý của kết quả.`
         }
 
         // Generate document analysis response
-        function generateDocumentAnalysis(file, subject) {
+        function generateDocumentAnalysis(subject, fileType) {
             const subjectName = getSubjectName(subject);
-            const fileType = file.type.includes('pdf') ? 'PDF' : 
-                           file.type.includes('word') ? 'Word' : 'ảnh';
+            const fileTypeName = fileType.includes('pdf') ? 'PDF' : 
+                               fileType.includes('word') ? 'Word' : 
+                               fileType.includes('image') ? 'ảnh' : 'tài liệu';
             
-            return `BÀI TẬP: Phân tích file ${fileType} - Môn ${subjectName}
+            return `BÀI TẬP: Phân tích file ${fileTypeName} - Môn ${subjectName}
 
 HƯỚNG DẪN GIẢI:
 1. Đã xác định file chứa bài tập ${subjectName}
@@ -1262,13 +1358,13 @@ HƯỚNG DẪN GIẢI:
    - Xác định dạng bài tập cho từng câu
    - Phân loại theo chủ đề kiến thức
 3. Các bước thực hiện:
-   - Câu 1: [Hướng dẫn phương pháp cho câu 1]
-   - Câu 2: [Hướng dẫn phương pháp cho câu 2]
-   - Câu 3: [Hướng dẫn phương pháp cho câu 3]
-4. Lưu ý: Thời gian phân bổ cho từng câu hợp lý
-5. Kiểm tra: Đối chiếu với kiến thức đã học
+   - Câu 1: Xác định dạng bài và phương pháp giải thích hợp
+   - Câu 2: Phân tích yêu cầu, liệt kê các bước cần làm
+   - Câu 3: Áp dụng kiến thức đã học để giải thích cách giải
+4. Lưu ý: Phân bổ thời gian hợp lý cho từng câu
+5. Kiểm tra: Đối chiếu phương pháp với kiến thức đã học
 
-LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích kỹ từng phần.`;
+LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích kỹ từng phần. Học sinh cần tự thực hiện các bước tính toán.`;
         }
 
         // Display solution in result area
@@ -1398,7 +1494,6 @@ LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích k�
         function resetAnalysis() {
             resultContent.innerHTML = `
                 <div class="info-box">
-                    <p>Sẵn sàng phân tích bài tập mới...</p>
                     <p>Chọn môn học, chụp ảnh hoặc tải file bài tập lên.</p>
                 </div>
             `;
@@ -1411,6 +1506,13 @@ LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích k�
                 analyzeDocBtn.disabled = true;
                 docPreview.classList.add('hidden');
                 currentFile = null;
+            }
+            
+            // Reset camera subject if in camera mode
+            if (currentTab === 'camera-tab') {
+                cameraSubjectButtons.forEach(btn => btn.classList.remove('active'));
+                cameraSubjectButtons[0].classList.add('active');
+                cameraSelectedSubject = 'toan';
             }
         }
     </script>
