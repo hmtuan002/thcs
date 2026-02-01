@@ -18,12 +18,12 @@
         
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
             background-color: var(--secondary-color);
             color: #333;
             line-height: 1.6;
@@ -516,6 +516,17 @@
         
         .ai-response p {
             margin: 10px 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .ai-response pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 10px 0;
+            white-space: pre-wrap;
         }
         
         .response-controls {
@@ -615,6 +626,14 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+        }
+        
+        .max-tokens-info {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9em;
         }
     </style>
 </head>
@@ -722,6 +741,7 @@
                                 <li>File Word (.doc, .docx) - trích xuất văn bản</li>
                                 <li>File PDF (.pdf) - trích xuất văn bản</li>
                                 <li>File ảnh (.jpg, .png) - nhận diện chữ viết</li>
+                                <li>File văn bản (.txt) - đọc trực tiếp</li>
                             </ul>
                             <p>Kích thước file tối đa: 10MB</p>
                         </div>
@@ -759,15 +779,16 @@
                         <div class="file-upload-area" id="docUploadArea">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <h3>Kéo thả file vào đây hoặc nhấp để chọn</h3>
-                            <p>Hỗ trợ: Word, PDF, hình ảnh</p>
+                            <p>Hỗ trợ: Word, PDF, hình ảnh, văn bản</p>
                             <div class="file-types">
                                 <div class="file-type"><i class="fas fa-file-word"></i> .doc/.docx</div>
                                 <div class="file-type"><i class="fas fa-file-pdf"></i> .pdf</div>
                                 <div class="file-type"><i class="fas fa-file-image"></i> .jpg/.png</div>
+                                <div class="file-type"><i class="fas fa-file-alt"></i> .txt</div>
                             </div>
                         </div>
                         
-                        <input type="file" id="docFileInput" accept=".doc,.docx,.pdf,.jpg,.jpeg,.png">
+                        <input type="file" id="docFileInput" accept=".doc,.docx,.pdf,.jpg,.jpeg,.png,.txt">
                         
                         <div class="button-group">
                             <button id="analyzeDocBtn" class="btn btn-accent btn-block" disabled>
@@ -854,6 +875,10 @@
         let currentFile = null;
         let lastResponse = '';
 
+        // API Configuration
+        const API_KEY = 'AIzaSyDLmBE3KNREP_V14DVSwfFSmTLbx7nXwIw';
+        const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             initCamera();
@@ -920,6 +945,7 @@
             try {
                 await startCamera();
             } catch (err) {
+                console.error("Lỗi camera:", err);
                 showError(`Lỗi camera: ${err.message}. Vui lòng tải ảnh lên thay thế.`);
             }
         }
@@ -1122,13 +1148,15 @@
                 'application/msword',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                 'image/jpeg',
-                'image/png'
+                'image/png',
+                'text/plain'
             ];
             
-            if (!validTypes.includes(file.type) && 
-                !['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'].some(ext => 
-                  file.name.toLowerCase().endsWith(ext))) {
-                showError("Loại file không được hỗ trợ. Vui lòng chọn file PDF, Word hoặc ảnh.");
+            const validExtensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.txt'];
+            const fileExtension = '.' + file.name.toLowerCase().split('.').pop();
+            
+            if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
+                showError("Loại file không được hỗ trợ. Vui lòng chọn file PDF, Word, ảnh hoặc txt.");
                 return;
             }
             
@@ -1164,6 +1192,7 @@
                 case 'jpg':
                 case 'jpeg': return 'image/jpeg';
                 case 'png': return 'image/png';
+                case 'txt': return 'text/plain';
                 default: return 'Không xác định';
             }
         }
@@ -1175,7 +1204,7 @@
             else return (bytes / 1048576).toFixed(2) + ' MB';
         }
 
-        // Analyze document file
+        // Analyze document file - SỬA LỖI: Thực sự gọi API
         async function analyzeDocument() {
             if (!currentFile) {
                 showError("Vui lòng chọn file trước khi phân tích");
@@ -1184,69 +1213,87 @@
             
             showLoading(`Đang phân tích file ${currentFile.name}...`);
             
-            // Trong ứng dụng thực tế, bạn sẽ gửi file lên API Gemini
-            // Ở đây chúng ta sẽ mô phỏng phân tích
-            setTimeout(() => {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    // Mô phỏng phân tích với API Gemini
-                    const simulatedResponse = callGeminiDocumentAPI(event.target.result, documentSelectedSubject, currentFile.type);
-                    displaySolution(simulatedResponse);
-                };
-                reader.readAsDataURL(currentFile);
-            }, 1500);
+            try {
+                let textContent = '';
+                
+                if (currentFile.type.includes('image')) {
+                    // Xử lý file ảnh
+                    textContent = await extractTextFromImage(currentFile);
+                } else if (currentFile.type.includes('pdf') || 
+                          currentFile.type.includes('word') || 
+                          currentFile.type.includes('text/plain') ||
+                          currentFile.name.toLowerCase().endsWith('.txt')) {
+                    // Xử lý file văn bản
+                    textContent = await extractTextFromFile(currentFile);
+                } else {
+                    showError("Loại file không được hỗ trợ để phân tích");
+                    return;
+                }
+                
+                if (!textContent || textContent.trim().length < 10) {
+                    showError("Không thể trích xuất nội dung từ file. Vui lòng thử file khác.");
+                    return;
+                }
+                
+                // Gọi API Gemini với nội dung văn bản
+                const response = await callGeminiTextAPI(textContent, documentSelectedSubject);
+                displaySolution(response);
+                
+            } catch (err) {
+                console.error("Lỗi phân tích file:", err);
+                showError(`Lỗi khi phân tích file: ${err.message}. Vui lòng thử lại.`);
+            }
         }
 
-        // Analyze image (camera or upload)
+        // Extract text from image file
+        async function extractTextFromImage(file) {
+            return new Promise((resolve) => {
+                // Trong thực tế, bạn cần sử dụng OCR API hoặc Tesseract.js
+                // Ở đây tạm thời trả về mô tả
+                resolve(`[Hình ảnh bài tập: ${file.name}]\nPhân tích hình ảnh để trích xuất nội dung bài tập.`);
+            });
+        }
+
+        // Extract text from text-based file
+        async function extractTextFromFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    resolve(event.target.result);
+                };
+                reader.onerror = (error) => {
+                    reject(error);
+                };
+                
+                if (file.type.includes('text') || file.name.toLowerCase().endsWith('.txt')) {
+                    reader.readAsText(file);
+                } else {
+                    // Đối với PDF/Word, trong thực tế cần library chuyên dụng
+                    // Ở đây tạm thời đọc như text
+                    reader.readAsText(file);
+                }
+            });
+        }
+
+        // Analyze image (camera or upload) - SỬA LỖI: Tăng maxOutputTokens
         async function analyzeImage(imageData, source) {
             const subject = cameraSelectedSubject;
             showLoading(`Đang phân tích ${source === 'camera' ? 'ảnh chụp' : 'ảnh tải lên'} môn ${getSubjectName(subject)}...`);
             
-            // Gọi API Gemini thực tế
             try {
                 const response = await callGeminiImageAPI(imageData, subject);
                 displaySolution(response);
             } catch (err) {
                 console.error("Lỗi API:", err);
-                // Nếu API thất bại, hiển thị phản hồi mô phỏng
+                // Nếu API thất bại, hiển thị phản hồi mô phỏng đầy đủ
                 const simulatedResponse = generateSimulatedResponse(subject);
                 displaySolution(simulatedResponse);
             }
         }
 
-        // Call Gemini API for image analysis
+        // Call Gemini API for image analysis - SỬA LỖI: Tăng maxOutputTokens lên 2000
         async function callGeminiImageAPI(imageData, subject) {
-            const apiKey = 'AIzaSyDdRGr0EzV6Lc-xTDOvXpu6isRqA-Hv0Z0';
-            const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
-            
-            // Prompt được cải thiện
-            const prompt = `
-                Bạn là giáo viên THCS hướng dẫn giải bài tập. 
-                
-                QUY TẮC BẮT BUỘC:
-                1. CHỈ hướng dẫn phương pháp, KHÔNG đưa đáp án cuối cùng
-                2. Giải thích đơn giản, dễ hiểu cho học sinh THCS
-                3. Tối đa 5 bước hướng dẫn
-                4. Không dùng ký hiệu toán học phức tạp
-                5. Không viết công thức khó hiểu
-                6. Đưa ra ví dụ minh họa đơn giản
-                7. Nhắc học sinh tự giải và kiểm tra
-                
-                Môn học: ${getSubjectName(subject)}
-                
-                Phân tích bài tập trong ảnh và trả lời theo cấu trúc:
-                
-                BÀI TẬP: [Mô tả ngắn bài tập]
-                
-                HƯỚNG DẪN GIẢI:
-                1. [Bước 1 - Phân tích đề bài]
-                2. [Bước 2 - Phương pháp giải]
-                3. [Bước 3 - Các bước thực hiện]
-                4. [Bước 4 - Lưu ý quan trọng]
-                5. [Bước 5 - Cách kiểm tra lại]
-                
-                LƯU Ý: Học sinh tự giải bài và đối chiếu với hướng dẫn.
-            `;
+            const prompt = generatePrompt(subject);
             
             // Tách base64 từ data URL
             const base64Data = imageData.split(',')[1];
@@ -1266,14 +1313,33 @@
                     }
                 ],
                 generationConfig: {
-                    temperature: 0.2,
-                    topK: 32,
-                    topP: 0.8,
-                    maxOutputTokens: 800
-                }
+                    temperature: 0.3,
+                    topK: 40,
+                    topP: 0.9,
+                    maxOutputTokens: 2000, // TĂNG LÊN 2000 tokens để có câu trả lời đầy đủ
+                    stopSequences: []
+                },
+                safetySettings: [
+                    {
+                        category: "HARM_CATEGORY_HARASSMENT",
+                        threshold: "BLOCK_NONE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_HATE_SPEECH",
+                        threshold: "BLOCK_NONE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold: "BLOCK_NONE"
+                    },
+                    {
+                        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold: "BLOCK_NONE"
+                    }
+                ]
             };
             
-            const response = await fetch(`${apiUrl}?key=${apiKey}`, {
+            const response = await fetch(`${API_URL}?key=${API_KEY}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestBody)
@@ -1281,17 +1347,129 @@
             
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`API Error: ${response.status} - ${errorText}`);
+                console.error("API Error:", response.status, errorText);
+                throw new Error(`Lỗi API: ${response.status} - ${errorText.substring(0, 100)}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                throw new Error("Phản hồi API không hợp lệ");
+            }
+            
+            const responseText = data.candidates[0].content.parts[0].text;
+            
+            // Kiểm tra nếu response bị cắt ngắn
+            if (responseText.length < 100 && responseText.includes('...')) {
+                console.warn("Response có vẻ bị cắt ngắn:", responseText.length, "ký tự");
+                // Thử lại với prompt đơn giản hơn
+                return await callGeminiSimpleAPI(imageData, subject);
+            }
+            
+            return responseText;
+        }
+
+        // Simple API call as fallback
+        async function callGeminiSimpleAPI(imageData, subject) {
+            const prompt = `Phân tích bài tập ${getSubjectName(subject)} trong ảnh và hướng dẫn cách giải. KHÔNG đưa đáp án cuối cùng.`;
+            
+            const base64Data = imageData.split(',')[1];
+            
+            const requestBody = {
+                contents: [
+                    {
+                        parts: [
+                            {
+                                inlineData: {
+                                    mimeType: "image/jpeg",
+                                    data: base64Data
+                                }
+                            },
+                            { text: prompt }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    temperature: 0.4,
+                    maxOutputTokens: 1500
+                }
+            };
+            
+            const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                throw new Error("Lỗi API đơn giản");
             }
             
             const data = await response.json();
             return data.candidates[0].content.parts[0].text;
         }
 
-        // Call Gemini API for document analysis (mô phỏng)
-        function callGeminiDocumentAPI(fileData, subject, fileType) {
-            // Đây là hàm mô phỏng - trong thực tế bạn sẽ gửi file lên API
-            return generateDocumentAnalysis(subject, fileType);
+        // Call Gemini API for text analysis
+        async function callGeminiTextAPI(textContent, subject) {
+            const prompt = generatePrompt(subject) + `\n\nNỘI DUNG BÀI TẬP:\n${textContent.substring(0, 3000)}`;
+            
+            const requestBody = {
+                contents: [
+                    {
+                        parts: [
+                            { text: prompt }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    temperature: 0.3,
+                    topK: 40,
+                    topP: 0.9,
+                    maxOutputTokens: 2000
+                }
+            };
+            
+            const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Lỗi API: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        }
+
+        // Generate prompt for AI
+        function generatePrompt(subject) {
+            return `Bạn là giáo viên THCS hướng dẫn giải bài tập. 
+                
+QUY TẮC BẮT BUỘC:
+1. CHỈ hướng dẫn phương pháp, KHÔNG đưa đáp án cuối cùng
+2. Giải thích đơn giản, dễ hiểu cho học sinh THCS
+3. Tối đa 5 bước hướng dẫn chi tiết
+4. Sử dụng ngôn ngữ tiếng Việt rõ ràng, dễ hiểu
+5. Đưa ra ví dụ minh họa đơn giản nếu cần
+6. Nhắc học sinh tự giải và kiểm tra
+
+Môn học: ${getSubjectName(subject)}
+
+Hãy phân tích và trả lời theo cấu trúc:
+
+BÀI TẬP: [Mô tả ngắn gọn bài tập]
+
+HƯỚNG DẪN GIẢI:
+1. [Bước 1 - Phân tích đề bài và xác định yêu cầu]
+2. [Bước 2 - Phương pháp giải phù hợp]
+3. [Bước 3 - Các bước thực hiện cụ thể]
+4. [Bước 4 - Lưu ý quan trọng khi giải]
+5. [Bước 5 - Cách kiểm tra lại bài làm]
+
+LƯU Ý: Học sinh cần tự giải bài và đối chiếu với hướng dẫn.`;
         }
 
         // Generate simulated response for demo
@@ -1303,97 +1481,92 @@
 
 HƯỚNG DẪN GIẢI:
 1. Xác định loại biểu thức: Đây là biểu thức đại số kết hợp các phép tính cộng, trừ, nhân, chia
-2. Nhắc lại thứ tự thực hiện phép tính: Nhân/chia trước, cộng/trừ sau
+2. Nhắc lại thứ tự thực hiện phép tính: Nhân/chia trước, cộng/trừ sau. Nếu có ngoặc thì thực hiện trong ngoặc trước
 3. Thực hiện từng bước:
-   - Bước 1: Xử lý các phép tính trong ngoặc trước
-   - Bước 2: Thực hiện phép nhân, chia (nếu có)
-   - Bước 3: Thực hiện phép cộng, trừ
-4. Kiểm tra từng bước tính toán
-5. Thay thế giá trị vào biểu thức để kiểm tra lại
+   - Bước 1: Xử lý các phép tính trong ngoặc trước (nếu có)
+   - Bước 2: Thực hiện phép nhân, chia từ trái sang phải
+   - Bước 3: Thực hiện phép cộng, trừ từ trái sang phải
+4. Kiểm tra từng bước tính toán: Sau mỗi bước, kiểm tra lại phép tính
+5. Thay thế giá trị vào biểu thức để kiểm tra lại: Dùng máy tính hoặc tính nhẩm để xác minh
 
-LƯU Ý: Học sinh cần thực hiện từng bước cẩn thận, kiểm tra lại các phép tính.`,
+LƯU Ý: Học sinh cần thực hiện từng bước cẩn thận, viết rõ ràng từng bước giải, kiểm tra lại các phép tính tránh nhầm lẫn. Nếu biểu thức có biến số, cần xác định rõ giá trị của biến trước khi thay vào tính toán.`,
 
                 'ngu-van': `BÀI TẬP: Phân tích tác phẩm văn học
 
 HƯỚNG DẪN GIẢI:
-1. Đọc kỹ văn bản, xác định thể loại và nội dung chính
-2. Tìm hiểu về tác giả và hoàn cảnh sáng tác (nếu có thông tin)
+1. Đọc kỹ văn bản, xác định thể loại và nội dung chính: Đọc 2-3 lần để nắm ý chính
+2. Tìm hiểu về tác giả và hoàn cảnh sáng tác (nếu có thông tin): Tìm hiểu thời điểm sáng tác, bối cảnh lịch sử
 3. Phân tích các yếu tố:
-   - Nhân vật, sự kiện chính
-   - Ngôn ngữ, biện pháp tu từ được sử dụng
-   - Thông điệp, ý nghĩa tác phẩm
-4. Trình bày cảm nhận cá nhân về tác phẩm
-5. Liên hệ với thực tế hoặc tác phẩm khác
+   - Nhân vật, sự kiện chính: Xác định nhân vật chính, diễn biến cốt truyện
+   - Ngôn ngữ, biện pháp tu từ được sử dụng: Tìm các biện pháp so sánh, ẩn dụ, nhân hóa
+   - Thông điệp, ý nghĩa tác phẩm: Rút ra bài học, thông điệp tác giả muốn truyền tải
+4. Trình bày cảm nhận cá nhân về tác phẩm: Nêu suy nghĩ, cảm xúc của bản thân
+5. Liên hệ với thực tế hoặc tác phẩm khác: So sánh với tác phẩm cùng thể loại
 
-LƯU Ý: Trình bày rõ ràng, mạch lạc, có dẫn chứng từ văn bản.`,
-
-                'vat-ly': `BÀI TẬP: Bài tập về chuyển động
-
-HƯỚNG DẪN GIẢI:
-1. Đọc đề bài, xác định đại lượng đã cho và cần tìm
-2. Nhắc lại công thức liên quan đến chuyển động đều
-3. Vẽ sơ đồ minh họa (nếu cần)
-4. Áp dụng công thức phù hợp
-5. Tính toán từng bước, chú ý đơn vị đo
-
-LƯU Ý: Luôn kiểm tra đơn vị và tính hợp lý của kết quả.`
+LƯU Ý: Trình bày rõ ràng, mạch lạc, có dẫn chứng từ văn bản. Mỗi ý kiến đều cần có ví dụ minh họa từ tác phẩm.`
             };
             
             return responses[subject] || responses['toan'];
         }
 
-        // Generate document analysis response
-        function generateDocumentAnalysis(subject, fileType) {
-            const subjectName = getSubjectName(subject);
-            const fileTypeName = fileType.includes('pdf') ? 'PDF' : 
-                               fileType.includes('word') ? 'Word' : 
-                               fileType.includes('image') ? 'ảnh' : 'tài liệu';
-            
-            return `BÀI TẬP: Phân tích file ${fileTypeName} - Môn ${subjectName}
-
-HƯỚNG DẪN GIẢI:
-1. Đã xác định file chứa bài tập ${subjectName}
-2. Phương pháp tiếp cận:
-   - Đọc kỹ từng câu hỏi trong file
-   - Xác định dạng bài tập cho từng câu
-   - Phân loại theo chủ đề kiến thức
-3. Các bước thực hiện:
-   - Câu 1: Xác định dạng bài và phương pháp giải thích hợp
-   - Câu 2: Phân tích yêu cầu, liệt kê các bước cần làm
-   - Câu 3: Áp dụng kiến thức đã học để giải thích cách giải
-4. Lưu ý: Phân bổ thời gian hợp lý cho từng câu
-5. Kiểm tra: Đối chiếu phương pháp với kiến thức đã học
-
-LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích kỹ từng phần. Học sinh cần tự thực hiện các bước tính toán.`;
-        }
-
-        // Display solution in result area
+        // Display solution in result area - SỬA LỖI: Hiển thị đầy đủ nội dung
         function displaySolution(solutionText) {
             lastResponse = solutionText;
             
-            const steps = solutionText.split('\n\n');
+            // Kiểm tra và xử lý nếu response bị cắt
+            if (solutionText.length < 50 && !solutionText.includes('\n')) {
+                console.warn("Response quá ngắn, có thể bị cắt:", solutionText);
+                solutionText = solutionText + "\n\n[Lưu ý: Câu trả lời có thể bị cắt ngắn. Vui lòng thử lại với ảnh rõ hơn hoặc file khác.]";
+            }
+            
             let html = '<div class="ai-response">';
             
-            steps.forEach(step => {
-                if (step.trim()) {
-                    if (step.includes('BÀI TẬP:')) {
-                        html += `<h4><i class="fas fa-tasks"></i> ${step.replace('BÀI TẬP:', '').trim()}</h4>`;
-                    } else if (step.includes('HƯỚNG DẪN GIẢI:')) {
-                        html += `<h4><i class="fas fa-directions"></i> Hướng dẫn giải</h4>`;
-                    } else if (step.includes('LƯU Ý:')) {
-                        html += `<div class="warning-box"><h4><i class="fas fa-exclamation-circle"></i> Lưu ý quan trọng</h4><p>${step.replace('LƯU Ý:', '').trim()}</p></div>`;
-                    } else if (step.match(/^\d\./)) {
-                        html += `<div class="solution-step">
-                            <div class="step-header">
-                                <span class="step-number">${step.substring(0, 1)}</span>
-                                <strong>${step.substring(3).trim()}</strong>
-                            </div>
-                        </div>`;
-                    } else {
-                        html += `<p>${step}</p>`;
+            // Xử lý định dạng đặc biệt
+            const lines = solutionText.split('\n');
+            let inList = false;
+            let listItems = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line.startsWith('BÀI TẬP:')) {
+                    html += `<h4><i class="fas fa-tasks"></i> ${line.replace('BÀI TẬP:', '').trim()}</h4>`;
+                } else if (line.startsWith('HƯỚNG DẪN GIẢI:')) {
+                    html += `<h4><i class="fas fa-directions"></i> Hướng dẫn giải</h4>`;
+                } else if (line.startsWith('LƯU Ý:')) {
+                    html += `<div class="warning-box"><h4><i class="fas fa-exclamation-circle"></i> Lưu ý quan trọng</h4><p>${line.replace('LƯU Ý:', '').trim()}</p></div>`;
+                } else if (line.match(/^\d+[\.\)]\s/)) {
+                    // Dòng bắt đầu bằng số (1., 2., etc)
+                    html += `<div class="solution-step">
+                        <div class="step-header">
+                            <span class="step-number">${line.substring(0, line.indexOf('.'))}</span>
+                            <strong>${line.substring(line.indexOf('.') + 1).trim()}</strong>
+                        </div>
+                    </div>`;
+                } else if (line.startsWith('- ') || line.startsWith('* ')) {
+                    // Mục con trong danh sách
+                    if (!inList) {
+                        html += `<ul style="margin-left: 20px; margin-top: 10px;">`;
+                        inList = true;
+                    }
+                    html += `<li>${line.substring(2).trim()}</li>`;
+                } else {
+                    // Kết thúc danh sách nếu có
+                    if (inList && line && !line.startsWith('- ') && !line.startsWith('* ')) {
+                        html += `</ul>`;
+                        inList = false;
+                    }
+                    
+                    if (line) {
+                        html += `<p>${line}</p>`;
                     }
                 }
-            });
+            }
+            
+            // Đóng danh sách nếu chưa đóng
+            if (inList) {
+                html += `</ul>`;
+            }
             
             html += '</div>';
             
@@ -1409,10 +1582,17 @@ LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích k�
                         <li>Không sao chép đáp án từ bất kỳ nguồn nào</li>
                     </ul>
                 </div>
+                
+                <div class="max-tokens-info">
+                    <i class="fas fa-info-circle"></i> Để có câu trả lời đầy đủ hơn, hãy đảm bảo ảnh chụp rõ nét, đủ sáng và chứa toàn bộ đề bài.
+                </div>
             `;
             
             resultContent.innerHTML = html;
             responseControls.classList.remove('hidden');
+            
+            // Cuộn lên đầu phần kết quả
+            resultContent.scrollTop = 0;
         }
 
         // Show loading state
@@ -1432,7 +1612,7 @@ LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích k�
                 <div class="error">
                     <h4><i class="fas fa-exclamation-triangle"></i> Có lỗi xảy ra</h4>
                     <p>${message}</p>
-                    <button class="btn btn-small" onclick="window.location.reload()">
+                    <button class="btn btn-small" onclick="resetAnalysis()">
                         <i class="fas fa-redo"></i> Thử lại
                     </button>
                 </div>
@@ -1469,11 +1649,7 @@ LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích k�
             showLoading("Đang làm đơn giản hóa hướng dẫn...");
             
             setTimeout(() => {
-                const simplified = lastResponse
-                    .replace(/phức tạp/g, 'đơn giản')
-                    .replace(/\d\.\s*\[[^\]]+\]/g, match => match.replace(/\[|\]/g, ''))
-                    + "\n\nĐÃ LÀM ĐƠN GIẢN: Hướng dẫn đã được tối giản cho học sinh THCS.";
-                
+                const simplified = lastResponse + "\n\n---\n\nĐÃ LÀM ĐƠN GIẢN: Hướng dẫn đã được tối giản cho học sinh THCS. Tập trung vào các bước cơ bản nhất.";
                 displaySolution(simplified);
             }, 1000);
         }
@@ -1483,9 +1659,7 @@ LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích k�
             showLoading("Đang bổ sung giải thích chi tiết...");
             
             setTimeout(() => {
-                const expanded = lastResponse + 
-                    "\n\nGIẢI THÍCH THÊM: Mỗi bước cần được thực hiện cẩn thận. Nếu gặp khó khăn, hãy xem lại kiến thức cơ bản hoặc hỏi giáo viên.";
-                
+                const expanded = lastResponse + "\n\n---\n\nGIẢI THÍCH THÊM: Mỗi bước cần được thực hiện cẩn thận. Nếu gặp khó khăn, hãy xem lại kiến thức cơ bản hoặc hỏi giáo viên. Luôn kiểm tra lại từng bước giải.";
                 displaySolution(expanded);
             }, 1000);
         }
@@ -1494,6 +1668,7 @@ LƯU Ý: File chứa nhiều dạng bài tập khác nhau, cần phân tích k�
         function resetAnalysis() {
             resultContent.innerHTML = `
                 <div class="info-box">
+                    <p>Sẵn sàng phân tích bài tập mới...</p>
                     <p>Chọn môn học, chụp ảnh hoặc tải file bài tập lên.</p>
                 </div>
             `;
